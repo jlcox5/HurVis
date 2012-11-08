@@ -7,21 +7,31 @@ public class predictedPaths implements pathStrategy{
 	
 	Advisory adv;
 	
+	double supportSpeed = 3.0;
+	//double supportBearing = 1.5;
+	//double supportSpeed = 0.0;
+	double supportBearing = 0.0;
+
+	
 	public Vector< Vector<Double> > bearingPredictor;
 	public Vector< Vector<Double> > bPredAreas;
 	public Vector< Vector<Double> > speedPredictor;
 	public Vector< Vector<Double> > sPredAreas;
 	
 	public int N;
-	//public int getDays(){return N;}
-	public int getDays(){return Math.min(5,N);}
+	public int getDays(){return N;}
+	//public int getDays(){return Math.min(5,N);}
+	
+	boolean badNum(double d){ return Double.isNaN(d) || Double.isInfinite(d);}
 	
 	private static double C0 = 1/(Math.sqrt(2*Math.PI));
 	
 	public double estimator(double x, double c, double s){
 		double invS = 1.0/s;
+		invS=badNum(invS)?0.0:invS;
 		double invS2 = invS*invS;
-		return invS*C0*Math.exp(-0.5*(x-c)*(x-c)*invS2);
+		double expPow = -0.5*(x-c)*(x-c)*invS2;
+		return expPow==0.0?0:invS*C0*Math.exp(expPow);
 	}
 	
 	public double minDiff(double a_i, double a_f){
@@ -101,8 +111,9 @@ public class predictedPaths implements pathStrategy{
 			
 			System.err.println(""+c_b+" "+bL+" "+bR);
 			
-			double m_b = c_b + 1.5*(Math.min(bL,bR) - c_b);
-			double M_b = c_b + 1.5*(Math.max(bL,bR) - c_b);
+			double m_b = c_b + supportBearing*(Math.min(bL,bR) - c_b);
+			double M_b = c_b + supportBearing*(Math.max(bL,bR) - c_b);
+			//if(Double.isNaN(m_b) || Double.isNaN(M_b)) System.err.println("BLEH");
 			
 			//double stddev = m_b < c_b ? (c_b-m_b/3.0) : (M_b-c_b/3.0);
 			double stddev = (c_b-m_b/3.0);
@@ -134,7 +145,7 @@ public class predictedPaths implements pathStrategy{
 				
 				bearingPredictor.get(i).set(j, right=estimator(sample_j,c_b,stddev));
 				bPredAreas.get(i).set(j-1,trapezoidalIntegrator(left,right,dj));
-				
+
 				left = right;
 			}
 			
@@ -144,8 +155,8 @@ public class predictedPaths implements pathStrategy{
 			double sL  = getSpeedDelta(adv.getLeft(iprev),adv.getLeft(i),adv.getLeft(inext),adv.hoursInSeg(iprev),adv.hoursInSeg(i));
 			double sR  = getSpeedDelta(adv.getRight(iprev),adv.getRight(i),adv.getRight(inext),adv.hoursInSeg(iprev),adv.hoursInSeg(i));
 			
-			double m_s = c_s + 3.0*(Math.min(sL,sR) - c_s);
-			double M_s = c_s + 3.0*(Math.max(sL,sR) - c_s);
+			double m_s = c_s + supportSpeed*(Math.min(sL,sR) - c_s);
+			double M_s = c_s + supportSpeed*(Math.max(sL,sR) - c_s);
 			
 			//stddev = M_s < c_s ? (c_s-m_s/3.0) : (M_s-c_s/3.0);
 			stddev = (c_s-m_s/3.0);
@@ -189,8 +200,13 @@ public class predictedPaths implements pathStrategy{
 				ssum += sPredAreas.get(i).get(j);
 				bsum += bPredAreas.get(i).get(j);
 			}
+			
 			double invsnorm = 1.0/ssum;
 			double invbnorm = 1.0/bsum;
+			
+			invbnorm = badNum(invbnorm)?1.0:invbnorm;
+			invsnorm = badNum(invbnorm)?1.0:invsnorm;
+			
 			double temp;
 			for(int j=0; j < 100; ++j){
 				temp = sPredAreas.get(i).get(j);
@@ -207,11 +223,14 @@ public class predictedPaths implements pathStrategy{
 		double r = rand.nextDouble();
 		double t=0,tn=areas.get(0);
 		int i=0;
-		while(tn<r){
+		while(tn<r && i < 99){
 			t = tn;
 			tn += areas.get(++i);
 		}
+		
 		t = (r-t)/(tn-t);
+
+		t=badNum(t)?1.0:t;
 		
 		return (1.0-t)*values.get(i)+t*values.get(i+1);
 	}
@@ -220,7 +239,8 @@ public class predictedPaths implements pathStrategy{
 	public vec genDeltas(vec x, int day) {
 	   vec ret = vec.vec2(nextDelta(bPredAreas.get(day),bearingPredictor.get(day))
 			             ,nextDelta(sPredAreas.get(day),speedPredictor.get(day)));
-	   System.err.println(ret);
+	   //System.err.println(ret);
+	   if(Double.isNaN(ret.get(0)) || Double.isNaN(ret.get(1))) System.err.println(""+ret+" "+day);
 	   return ret;
 	}
 

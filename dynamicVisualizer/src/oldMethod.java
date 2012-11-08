@@ -100,22 +100,25 @@ public class oldMethod implements Visualizer {
 			else ++dcursor;
 		}
 
-		vec    x = adv.getPos(0);
+		vec    x1;
+		vec    x0 = adv.getPos(0);
 		double s = adv.getSpeed(0);
 		double b = adv.getBear(0);
 		
 		Path p = new Path(pathTTL);
-		     p.nodes.add(adv.project(x));
+		     p.nodes.add(adv.project(x0));
 		     
 		for(int i=0; i < predicted.getDays(); ++i){
-			vec delta = predicted.genDeltas(x, i);
+			vec delta = predicted.genDeltas(x0, i);
 			s = vizUtils.addSpeed(s, delta.get(1));
 			b = vizUtils.addBearing(b,delta.get(0));
 			double dist = s/adv.hoursInSeg(0);
 			//System.err.println(""+b+" "+s);
-			x = vizUtils.spherical_translation(x, dist, b);
+			x1 = vizUtils.spherical_translation(x0, dist, b);
 			
-			p.nodes.add(adv.project(x));
+			p.nodes.add(adv.project(x1));
+			
+			x0 = x1;
 		}
 		paths.add(p);
 		//System.err.println(p);
@@ -193,6 +196,7 @@ public class oldMethod implements Visualizer {
 			
 			vec v_ij0 = p_i.nodes.get(0);
 			for(int j=1; j < p_i.nodes.size(); ++j){
+				//System.err.println(i);
 			//for(int j=1; j < 2; ++j){
 				vec v_ij1 = p_i.nodes.get(j);
 				//g.drawLine((int)v_ij0.get(0),(int)v_ij0.get(1)
@@ -212,7 +216,7 @@ public class oldMethod implements Visualizer {
 		g.drawImage(hmap,0,0,d.width,d.height,null);
 		drawErrorBars(g,d);
 		drawTruePath(g,d);
-		//drawPaths(g,d);
+		drawPaths(g,d);
 		
 		//return image.getScaledInstance(d.width,d.height,Image.SCALE_SMOOTH);
 		return image;

@@ -20,18 +20,24 @@ public class Advisory {
     private int SPEED    = 3;
     
     private static double[] errorRad = {50.004, 100.471, 144.302, 187.515, 283.263, 390.463};
+    private static double[] errorRadHours = null;
     
-    private double getError(int d){
-    	//return errorRad[Math.min(5, d)];
-    	double t = ((double)d)/9.0;
-    	return 50.0+t*50.0;
+    private double getError(int h){
+    	return errorRadHours[Math.min(errorRadHours.length, h)];
     }
     
     public static int[] hours = {9,12,12,12,24};
+    //MAKE THIS BETTER :(
+    public double hoursInSeg_old(int seg){
+    	return hours[Math.min(seg,4)];
+    }
+    public int hoursInSegInt_old(int seg){
+    	return hours[Math.min(seg,4)];
+    }
     
     public double hoursInSeg(int seg){
     	//return hours[ Math.min(seg, 4) ];
-    	return 1;
+    	return 3;
     }
     
     public vec getPos(int i){
@@ -57,6 +63,30 @@ public class Advisory {
     }
     
     public Advisory(String advfile){
+    	if(errorRadHours==null){
+    		int sum=0;
+    		for(int i=0;i<errorRad.length;++i) 
+    			sum+=hoursInSeg_old(i);
+    		errorRadHours = new double[sum];
+    		int next=0;
+    		double left=0.0;
+    		double right;
+    		for(int i=0;i<errorRad.length;++i){
+    		   right=errorRad[i];
+    		   int t_int = hoursInSegInt_old(i);
+    		   double t = (double)t_int;
+    		   for(int j=i==0?1:0;j<t_int/3;++j){
+    			   double j_dub = (double)j;
+    			   double aleph = j_dub/t;
+    			   errorRadHours[next++]=(1.0-aleph)*left + (aleph)*right;
+    		   }
+    		   left=right;
+    		}
+    		//System.err.println("-----------------");
+    		//for(int i=0;i<errorRadHours.length;++i) System.err.println(""+errorRadHours[i]);
+    		//System.err.println("-----------------");
+    	}
+    	
     	InputStreamReader rdr = new InputStreamReader(this.getClass().getResourceAsStream(advfile));
     	BufferedReader    in  = new BufferedReader(rdr);
     	
@@ -108,9 +138,12 @@ public class Advisory {
     	   vec p1 = d1.head(2);
     	   
     	   double bearO = vizUtils.findBearing_2(p0,p1);
-    	   System.err.println("!"+bearO);
+    	   System.err.println("!bear true: "+bearO);
     	   double bearL = bearO < 90.0 ? bearO + 270.0 : bearO - 90.0;
     	   double bearR = (bearO + 90.0) % 360.0;
+    	   //System.err.println("!bear err: "+bearL + " " + bearR);
+    	   
+    	   System.err.println(i + " " + getError(i));
     	   
     	   leftBounds[i+1] = vizUtils.spherical_translation(p1, getError(i), bearL);
     	   rightBounds[i+1] = vizUtils.spherical_translation(p1, getError(i), bearR);
