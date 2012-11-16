@@ -9,7 +9,7 @@ public class Advisory {
     public Vector<vec> pathdata = new Vector<vec>();
     
     //private Bounds latlonframe = new Bounds(-100,17,25,16);
-    private Bounds latlonframe = new Bounds(-100,31,25,-16);
+    private Bounds latlonframe = new Bounds(-100,33,25,-15.5);
     public vec project(vec p){
     	return latlonframe.project(p);
     }
@@ -138,12 +138,12 @@ public class Advisory {
     	   vec p1 = d1.head(2);
     	   
     	   double bearO = vizUtils.findBearing_2(p0,p1);
-    	   System.err.println("!bear true: "+bearO);
+    	   //System.err.println("!bear true: "+bearO);
     	   double bearL = bearO < 90.0 ? bearO + 270.0 : bearO - 90.0;
     	   double bearR = (bearO + 90.0) % 360.0;
     	   //System.err.println("!bear err: "+bearL + " " + bearR);
     	   
-    	   System.err.println(i + " " + getError(i));
+    	   //System.err.println(i + " " + getError(i));
     	   
     	   leftBounds[i+1] = vizUtils.spherical_translation(p1, getError(i), bearL);
     	   rightBounds[i+1] = vizUtils.spherical_translation(p1, getError(i), bearR);

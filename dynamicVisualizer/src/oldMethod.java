@@ -88,16 +88,22 @@ public class oldMethod implements Visualizer {
 	
 	private static final int pathTTL = 150;
 	
+	private static boolean extinction = true;
+	private static boolean once = false;
+	private static boolean oneshot = true;
+	
 	@Override
 	public void Update() {
 		
 		//Graphics g = image.createGraphics();
 		
-		int dcursor=0;
-		while(dcursor<paths.size()){
-			if(paths.get(dcursor).dec())
-				paths.removeElementAt(dcursor);
-			else ++dcursor;
+		if(extinction){
+		   int dcursor=0;
+		   while(dcursor<paths.size()){
+		       if(paths.get(dcursor).dec())
+				  paths.removeElementAt(dcursor);
+			   else ++dcursor;
+		   }
 		}
 
 		vec    x1;
@@ -108,19 +114,23 @@ public class oldMethod implements Visualizer {
 		Path p = new Path(pathTTL);
 		     p.nodes.add(adv.project(x0));
 		     
-		for(int i=0; i < predicted.getDays(); ++i){
-			vec delta = predicted.genDeltas(x0, i);
-			s = vizUtils.addSpeed(s, delta.get(1));
-			b = vizUtils.addBearing(b,delta.get(0));
-			double dist = s/adv.hoursInSeg(0);
-			//System.err.println(""+b+" "+s);
-			x1 = vizUtils.spherical_translation(x0, dist, b);
+		if(!once || oneshot){
+		   for(int i=0; i < predicted.getDays(); ++i){
+			   vec delta = predicted.genDeltas(x0, i);
+			   s = vizUtils.addSpeed(s, delta.get(1));
+			   b = vizUtils.addBearing(b,delta.get(0));
+			   double dist = s/adv.hoursInSeg(0);
+			   //System.err.println(""+b+" "+s);
+			   x1 = vizUtils.spherical_translation(x0, dist, b);
 			
-			p.nodes.add(adv.project(x1));
+			   p.nodes.add(adv.project(x1));
 			
-			x0 = x1;
+			   //System.err.println(""+i+" "+delta);
+			   x0 = x1;
+		   }
+		   paths.add(p);
+		   oneshot = false;
 		}
-		paths.add(p);
 		//System.err.println(p);
 		
 		/*
