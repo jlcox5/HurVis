@@ -119,7 +119,8 @@ public class oldMethod implements Visualizer {
 			   vec delta = predicted.genDeltas(x0, i);
 			   s = vizUtils.addSpeed(s, delta.get(1));
 			   b = vizUtils.addBearing(b,delta.get(0));
-			   double dist = s/adv.hoursInSeg(0);
+			   //if(i==0)System.err.println("delta - Bearing: " + delta.get(0) + " - " + b);
+			   double dist = s*adv.hoursInSeg();
 			   //System.err.println(""+b+" "+s);
 			   x1 = vizUtils.spherical_translation(x0, dist, b);
 			
@@ -184,12 +185,16 @@ public class oldMethod implements Visualizer {
 			drawPath(g,p0,p1,d);
 		}
 	}
-	
+	float invsqr2f = (float) (1.0/Math.sqrt(2.0));
 	private void drawErrorBars(Graphics g, Dimension d){
-		float[] color = {1f,0f,0f};
-		g.setColor(new Color(color[0],color[1],color[2],1f));
+		float[] color1 = {invsqr2f,invsqr2f,0f};
+		float[] color2 = {0f,1f,0f};
+		boolean c = true;
+		
 		//for(int i=1;i<Math.min(7,adv.leftBounds.length);++i){
 		for(int i=1;i<adv.leftBounds.length;++i){
+			float[] color = (c^=true)?color1:color2; 
+			g.setColor(new Color(color[0],color[1],color[2],1f));
 			drawPath(g,adv.project(adv.leftBounds[i-1]),adv.project(adv.leftBounds[i]),d);
 			drawPath(g,adv.project(adv.rightBounds[i-1]),adv.project(adv.rightBounds[i]),d);
 		}
@@ -205,12 +210,49 @@ public class oldMethod implements Visualizer {
 			g.setColor(new Color(proto[0],proto[1],proto[2],alpha));
 			
 			vec v_ij0 = p_i.nodes.get(0);
+			boolean colorChange = true;
 			for(int j=1; j < p_i.nodes.size(); ++j){
 				//System.err.println(i);
 			//for(int j=1; j < 2; ++j){
 				vec v_ij1 = p_i.nodes.get(j);
 				//g.drawLine((int)v_ij0.get(0),(int)v_ij0.get(1)
 				//		  ,(int)v_ij1.get(0),(int)v_ij1.get(1));
+				if(colorChange){
+				  g.setColor(new Color(255, 0 ,0));
+				}
+				else{
+			      g.setColor(new Color(0, 0, 255));
+				}
+				colorChange = !colorChange;
+				drawPath(g,v_ij0,v_ij1,d);
+				v_ij0 = v_ij1;
+			}
+		}
+	}
+	private void drawPaths(Graphics g,Dimension d,int MAX){
+		//Color proto = Color.blue;
+		float[] proto = {0f,0.2f,1f};
+		
+		for(int i=0; i < paths.size(); ++i){
+			Path p_i = paths.get(i);
+			float alpha = ((float)p_i.ttl)/255.0f;
+			g.setColor(new Color(proto[0],proto[1],proto[2],alpha));
+			
+			vec v_ij0 = p_i.nodes.get(0);
+			boolean colorChange = true;
+			for(int j=1; j < Math.min(MAX+1,p_i.nodes.size()); ++j){
+				//System.err.println(i);
+			//for(int j=1; j < 2; ++j){
+				vec v_ij1 = p_i.nodes.get(j);
+				//g.drawLine((int)v_ij0.get(0),(int)v_ij0.get(1)
+				//		  ,(int)v_ij1.get(0),(int)v_ij1.get(1));
+				if(colorChange){
+				  g.setColor(new Color(255, 0 ,0));
+				}
+				else{
+			      g.setColor(new Color(0, 0, 255));
+				}
+				colorChange = !colorChange;
 				drawPath(g,v_ij0,v_ij1,d);
 				v_ij0 = v_ij1;
 			}
@@ -226,7 +268,8 @@ public class oldMethod implements Visualizer {
 		g.drawImage(hmap,0,0,d.width,d.height,null);
 		drawErrorBars(g,d);
 		drawTruePath(g,d);
-		drawPaths(g,d);
+		//drawPaths(g,d);
+		drawPaths(g,d,1);
 		
 		//return image.getScaledInstance(d.width,d.height,Image.SCALE_SMOOTH);
 		return image;

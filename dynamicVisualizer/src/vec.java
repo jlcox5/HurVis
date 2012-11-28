@@ -88,6 +88,20 @@ public double dot(vec rhs){
 	   return ret;
    }
    
+   public vec lerp(vec rhs, double t){
+	   vec ret = new vec(N);
+	   for(int i=0; i < N; ++i)
+		   ret.set(i,(1.0-t)*get(i) + t*rhs.get(i));
+	   return ret;
+   }
+   
+   public vec copy(){
+	   vec ret = new vec(N);
+	   for(int i=0; i < N; ++i)
+		   ret.set(i,get(i));
+	   return ret;
+   }
+   
    @Override
    public String toString(){
 	  String ret = "(";

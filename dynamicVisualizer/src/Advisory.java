@@ -20,23 +20,30 @@ public class Advisory {
     private int SPEED    = 3;
     
     private static double[] errorRad = {50.004, 100.471, 144.302, 187.515, 283.263, 390.463};
-    private static double[] errorRadHours = null;
+    private static double[] errorRadSegs = null;
     
-    private double getError(int h){
-    	return errorRadHours[Math.min(errorRadHours.length, h)];
+    private double getErrorDayi(int i){
+    	return i==0 ? 0.0 : errorRad[Math.min(i-1, 5)];
+    }
+    
+    private double getErrorSegi(int seg){
+    	return errorRadSegs[Math.min(errorRadSegs.length, seg)];
     }
     
     public static int[] hours = {9,12,12,12,24};
     //MAKE THIS BETTER :(
-    public double hoursInSeg_old(int seg){
+    public double hoursInOriginalSeg(int seg){
     	return hours[Math.min(seg,4)];
     }
-    public int hoursInSegInt_old(int seg){
+    public int hoursInOriginalSegi(int seg){
     	return hours[Math.min(seg,4)];
     }
     
-    public double hoursInSeg(int seg){
+    public double hoursInSeg(){
     	//return hours[ Math.min(seg, 4) ];
+    	return 3;
+    }
+    public int hoursInSegi(){
     	return 3;
     }
     
@@ -63,22 +70,24 @@ public class Advisory {
     }
     
     public Advisory(String advfile){
-    	if(errorRadHours==null){
+    	if(errorRadSegs==null){
     		int sum=0;
     		for(int i=0;i<errorRad.length;++i) 
-    			sum+=hoursInSeg_old(i);
-    		errorRadHours = new double[sum];
+    			sum+=hoursInOriginalSegi(i);
+    		errorRadSegs = new double[sum/hoursInSegi()];
+    		//System.err.println(sum);
     		int next=0;
     		double left=0.0;
     		double right;
+    		//[FIX] Begin at 0.0km through 7 days
     		for(int i=0;i<errorRad.length;++i){
     		   right=errorRad[i];
-    		   int t_int = hoursInSegInt_old(i);
+    		   int t_int = hoursInOriginalSegi(i);
     		   double t = (double)t_int;
     		   for(int j=i==0?1:0;j<t_int/3;++j){
     			   double j_dub = (double)j;
     			   double aleph = j_dub/t;
-    			   errorRadHours[next++]=(1.0-aleph)*left + (aleph)*right;
+    			   errorRadSegs[next++]=(1.0-aleph)*left + (aleph)*right;
     		   }
     		   left=right;
     		}
@@ -86,6 +95,8 @@ public class Advisory {
     		//for(int i=0;i<errorRadHours.length;++i) System.err.println(""+errorRadHours[i]);
     		//System.err.println("-----------------");
     	}
+    	
+    	for(int i=0;i<errorRadSegs.length;++i)System.err.println("Dbug["+i+"]: "+errorRadSegs[i]);
     	
     	InputStreamReader rdr = new InputStreamReader(this.getClass().getResourceAsStream(advfile));
     	BufferedReader    in  = new BufferedReader(rdr);
@@ -128,8 +139,69 @@ public class Advisory {
        leftBounds = new vec[pathdata.size()];
        rightBounds = new vec[pathdata.size()];
        
-       leftBounds[0] = rightBounds[0] = pathdata.get(0).head(2);
-    	
+       //leftBounds[0] = pathdata.get(0).head(2);
+       //rightBounds[0] = pathdata.get(0).head(2);
+       
+       vec[] leftErrProto  = new vec[7];
+       vec[] rightErrProto = new vec[7];
+       
+       leftErrProto[0]  = pathdata.get(0).head(2);
+       rightErrProto[0] = pathdata.get(0).head(2);
+       
+       int lastCursor = 0;
+       int thisCursor = 0;
+       for(int i=1; i < 6; ++i){
+    	   int h = hoursInOriginalSegi(i-1);
+    	   thisCursor += h/3;
+    	   
+    	   vec d0 = pathdata.get(lastCursor);
+    	   vec d1 = pathdata.get(thisCursor);
+    	   
+    	   vec p0 = d0.head(2);
+    	   vec p1 = d1.head(2);
+    	   
+    	   double bearO = vizUtils.findBearing_2(p0,p1);
+    	   double bearL = bearO < 90.0 ? bearO + 270.0 : bearO - 90.0;
+    	   double bearR = (bearO + 90.0) % 360.0;
+    	   
+    	   leftErrProto[i] = vizUtils.spherical_translation(p1, getErrorDayi(i), bearL);
+    	   rightErrProto[i] = vizUtils.spherical_translation(p1, getErrorDayi(i), bearR);
+    	   
+    	   lastCursor=thisCursor;
+       }
+       //Interpolate over segments for true error bounds
+       
+       int segments=0;
+       for(int i=0; i < 5; ++i){
+    	   int J = hoursInOriginalSegi(i)/3;
+    	   double dubJ = (double)J;
+    	   
+    	   vec L0 = leftErrProto[i];
+    	   vec L1 = leftErrProto[i+1];
+    	   vec R0 = rightErrProto[i];
+    	   vec R1 = rightErrProto[i+1];
+    	   
+    	   for(int j=0; j < (J=hoursInOriginalSegi(i)/3); ++j){
+    		   double dubj = (double)j;
+    		   double t = dubj/dubJ;
+    		   
+    		   leftBounds[segments] = L0.lerp(L1,t);
+    		   rightBounds[segments] = R0.lerp(R1,t);
+    		   
+    		   ++segments;
+    	   }
+       }
+       
+       while( segments < pathdata.size() ){
+    	   //Handle extrapolation at end of bounds
+    	   double bearing = vizUtils.findBearing_2(pathdata.get(segments-1), pathdata.get(segments));
+    	   
+    	   leftBounds[segments]  = vizUtils.spherical_translation(leftBounds[segments-1],getErrorDayi(segments),bearing);
+    	   rightBounds[segments] = vizUtils.spherical_translation(rightBounds[segments-1],getErrorDayi(segments),bearing);
+    	   
+    	   ++segments;
+       }
+/*
        for(int i=0; i < pathdata.size()-1; ++i){
     	   vec d0 = pathdata.get(i);
     	   vec d1 = pathdata.get(i+1);
@@ -145,8 +217,9 @@ public class Advisory {
     	   
     	   //System.err.println(i + " " + getError(i));
     	   
-    	   leftBounds[i+1] = vizUtils.spherical_translation(p1, getError(i), bearL);
-    	   rightBounds[i+1] = vizUtils.spherical_translation(p1, getError(i), bearR);
+    	   leftBounds[i+1] = vizUtils.spherical_translation(p1, getErrorSegi(i), bearL);
+    	   rightBounds[i+1] = vizUtils.spherical_translation(p1, getErrorSegi(i), bearR);
        }
+*/
     }
 }

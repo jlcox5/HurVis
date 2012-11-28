@@ -4,7 +4,7 @@ public class vizUtils {
 	public static double addBearing(double current, double delta){
 		double sum = current+delta;
 		if(sum >= 360.0) return sum % 360.0;
-		if(sum < 0.0)   return 360 - ( Math.abs(sum) % 360 );
+		if(sum < 0.0)    return 360 + ( sum % 360 );
 		return sum;
 	}
 	public static double addSpeed(double current, double delta){

@@ -33,31 +33,36 @@ public class pdf {
 	
 	private void mkProbs(){
 		
-		double stddev = Math.abs(min-center/3.0);
+		double stddev_lte = (center-min)/3.0;
+		double stddev_gt = (max-center)/3.0;
+		
 		for(int i=0; i < 50; ++i){
 			double dubi = (double)i;
 			double val  = min+dubi*dx;
 			
+			double stddev = stddev_lte;
+			
 			probabilities[i]=estimator(val,center,stddev);
 		}
-		probabilities[50]=estimator(center,center,stddev);
-		stddev = Math.abs(max-center/3.0);
+		probabilities[50]=estimator(center,center,stddev_lte);
 		for(int i=51; i < 101; ++i){
 			double dubi = (double)i;
 			double val  = center+dubi*dX;
+			
+			double stddev = stddev_gt;
 			
 			probabilities[i]=estimator(val,center,stddev);
 		}
 	}
 	private void mkAreas(){
 		double left,right = probabilities[0];
-		double h = Math.abs(dx);
+		double h = dx;
 		for(int i=0; i < 50; ++i){
 			left = right;
 			right=probabilities[i+1];
 			areas[i] = trapezoidal(left,right,h);
 		}
-		h = Math.abs(dX);
+		h = dX;
 		for(int i=50; i < 100; ++i){
 			left = right;
 			right=probabilities[i+1];
@@ -74,8 +79,19 @@ public class pdf {
 			areas[i] *= inv;
 		}
 		
-		sum=0.0;
-		for(int i=0; i < 100; ++i) sum += areas[i];
+		//sum=0.0;
+		//for(int i=0; i < 100; ++i) sum += areas[i];
+	}
+	
+	public void Display(){
+		System.err.println("AREAS:");
+		System.err.println("_____________________________");
+		for(int i=0; i < 100; ++i) System.err.println((i==50)?"[+]"+areas[i]:areas[i]);
+		System.err.println("_____________________________");
+		System.err.println("PROBS:");
+		System.err.println("_____________________________");
+		for(int i=0; i < 100; ++i) System.err.println((i==50)?"[+]"+probabilities[i]:probabilities[i]);
+		System.err.println("_____________________________");
 	}
 	
 	public pdf(double nmin, double nmax, double ncenter){
@@ -98,7 +114,7 @@ public class pdf {
 		double r = rand.nextDouble();
 		double t=0,tn=areas[0];
 		int i=0;
-		while(tn<r && i < 99){
+		while(tn<r && i < 101){
 			t = tn;
 			tn += areas[++i];
 		}
