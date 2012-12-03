@@ -268,8 +268,8 @@ public class oldMethod implements Visualizer {
 		g.drawImage(hmap,0,0,d.width,d.height,null);
 		drawErrorBars(g,d);
 		drawTruePath(g,d);
-		//drawPaths(g,d);
-		drawPaths(g,d,1);
+		drawPaths(g,d);
+		//drawPaths(g,d,1);
 		
 		//return image.getScaledInstance(d.width,d.height,Image.SCALE_SMOOTH);
 		return image;

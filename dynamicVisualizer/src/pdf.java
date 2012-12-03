@@ -15,10 +15,12 @@ public class pdf {
 		//invS=badNum(invS)?0.0:invS;
 		double invS2 = invS*invS;
 		double expPow = -0.5*(x-c)*(x-c)*invS2;
-		return expPow==0.0?0:invS*C0*Math.exp(expPow);
+		//return expPow==0.0?invS*C0:invS*C0*Math.exp(expPow);
+		return invS*C0*Math.exp(expPow);
 	}
 	double trapezoidal(double a, double b, double dt){
-		dt = Math.abs(dt);
+		//a = Math.abs(a); b = Math.abs(b); dt = Math.abs(dt);
+		//dt = Math.abs(dt);
 		double area = 0.5*dt*(b+a);
 		return area;
 	}
@@ -33,36 +35,37 @@ public class pdf {
 	
 	private void mkProbs(){
 		
-		double stddev_lte = (center-min)/3.0;
-		double stddev_gt = (max-center)/3.0;
+		double stddev_lte = Math.abs(center-min)/3.0;
+		double stddev_gt = Math.abs(max-center)/3.0;
+		//System.err.println("dx,dX = " + dx+","+dX);
 		
 		for(int i=0; i < 50; ++i){
 			double dubi = (double)i;
 			double val  = min+dubi*dx;
+			//double val = vizUtils.addBearing(min, dubi*dx);
 			
-			double stddev = stddev_lte;
-			
-			probabilities[i]=estimator(val,center,stddev);
+		    probabilities[i]=estimator(val,center,stddev_lte);
 		}
 		probabilities[50]=estimator(center,center,stddev_lte);
 		for(int i=51; i < 101; ++i){
-			double dubi = (double)i;
+			double dubi = (double)(i-51);
 			double val  = center+dubi*dX;
-			
-			double stddev = stddev_gt;
-			
-			probabilities[i]=estimator(val,center,stddev);
+			//double val = vizUtils.addBearing(center, dubi*dX);
+				
+			probabilities[i]=estimator(val,center,stddev_gt);
 		}
+		
+		//for(int i=0; i < probabilities.length; ++i) if( probabilities[i] < 0.0 ) System.err.println("BAD");
 	}
 	private void mkAreas(){
 		double left,right = probabilities[0];
-		double h = dx;
+		double h = Math.abs(dx);
 		for(int i=0; i < 50; ++i){
 			left = right;
 			right=probabilities[i+1];
 			areas[i] = trapezoidal(left,right,h);
 		}
-		h = dX;
+		h = Math.abs(dX);
 		for(int i=50; i < 100; ++i){
 			left = right;
 			right=probabilities[i+1];
@@ -97,6 +100,12 @@ public class pdf {
 	public pdf(double nmin, double nmax, double ncenter){
 		min=nmin;
 		max=nmax;
+		
+		if(max<min){
+			double temp=max;
+			max=min;
+			min=temp;
+		}
 		center=ncenter;
 		
 		probabilities = new double[101];
@@ -114,7 +123,7 @@ public class pdf {
 		double r = rand.nextDouble();
 		double t=0,tn=areas[0];
 		int i=0;
-		while(tn<r && i < 101){
+		while(tn<r && i < 100){
 			t = tn;
 			tn += areas[++i];
 		}

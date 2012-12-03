@@ -10,8 +10,8 @@ public class predictedPaths implements pathStrategy {
 	double supportBearing = 1.5;
 	double supportSpeed = 0.0001;
 	//double supportBearing = 0.0001;
-	//double supportScale = (double)10e-1;
-	double supportScale = 1.0;
+	double supportScale = (double)10e-2;
+	//double supportScale = 1.0;
 	
 	double supportSpeed(){
 		return supportSpeed*supportScale;
@@ -92,7 +92,7 @@ public class predictedPaths implements pathStrategy {
 			double M_b = maxSample(bL,c_b,bR,supportBearing());
 			
             bearingPDFs.set(0,new pdf(m_b,M_b,c_b));
-            //bearingPDFs.get(0).Display();
+            bearingPDFs.get(0).Display();
 			
 			double c_s = (vizUtils.haversine(adv.getPos(0), adv.getPos(1))/adv.hoursInSeg())-(speed0=adv.getSpeed(0));
 			double sL  = (vizUtils.haversine(adv.getLeft(0), adv.getLeft(1)))-speed0;
