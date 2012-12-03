@@ -91,8 +91,11 @@ public class predictedPaths implements pathStrategy {
 			double m_b = minSample(bL,c_b,bR,supportBearing());
 			double M_b = maxSample(bL,c_b,bR,supportBearing());
 			
+			System.err.println("Min: " + m_b + "   Cen: " + c_b + "   Max: " + M_b);
+			
             bearingPDFs.set(0,new pdf(m_b,M_b,c_b));
-            bearingPDFs.get(0).Display();
+            System.exit(0);
+            //bearingPDFs.get(0).Display();
 			
 			double c_s = (vizUtils.haversine(adv.getPos(0), adv.getPos(1))/adv.hoursInSeg())-(speed0=adv.getSpeed(0));
 			double sL  = (vizUtils.haversine(adv.getLeft(0), adv.getLeft(1)))-speed0;
