@@ -10,8 +10,8 @@ public class predictedPaths implements pathStrategy {
 	double supportBearing = 1.5;
 	double supportSpeed = 0.0001;
 	//double supportBearing = 0.0001;
-	double supportScale = (double)10e-2;
-	//double supportScale = 1.0;
+	//double supportScale = (double)10e-2;
+	double supportScale = 1.0;
 	
 	double supportSpeed(){
 		return supportSpeed*supportScale;
@@ -52,8 +52,8 @@ public class predictedPaths implements pathStrategy {
 	}
 	
 	double getBearingDelta(vec p0, vec p1, vec p2){
-		double bi = vizUtils.findBearing_2(p1, p2);
-		double bf = 180.0+vizUtils.findBearing_2(p1, p0);
+		double bf = vizUtils.findBearing_2(p1, p2);
+		double bi = 180.0+vizUtils.findBearing_2(p1, p0);
 		
 		return _getBearingDelta(bi,bf);
 	}
@@ -94,7 +94,7 @@ public class predictedPaths implements pathStrategy {
 			System.err.println("Min: " + m_b + "   Cen: " + c_b + "   Max: " + M_b);
 			
             bearingPDFs.set(0,new pdf(m_b,M_b,c_b));
-            System.exit(0);
+            //System.exit(0);
             //bearingPDFs.get(0).Display();
 			
 			double c_s = (vizUtils.haversine(adv.getPos(0), adv.getPos(1))/adv.hoursInSeg())-(speed0=adv.getSpeed(0));

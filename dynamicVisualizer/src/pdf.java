@@ -30,11 +30,13 @@ public class pdf {
 	}
 	
 	public double interp(int i, double t){
-		System.err.println("    i: " + i + "    min val: " + value(i) +  "   max val: " + value(i+1));
+		//System.err.println("    i: " + i + "    min val: " + value(i) +  "   max val: " + value(i+1));
 		return (1.0-t)*value(i)+t*value(i+1);
 	}
 	
 	private void mkProbs(){
+		
+		System.err.println(":::"+min+":::"+max+":::");
 		
 		double stddev_lte = Math.abs(center-min)/3.0;
 		double stddev_gt = Math.abs(max-center)/3.0;
@@ -156,6 +158,7 @@ public class pdf {
 		mkProbs();
 		mkAreas();
 		//mkNormal();
+		
 	}
 	
 	public double generate(Random rand){
