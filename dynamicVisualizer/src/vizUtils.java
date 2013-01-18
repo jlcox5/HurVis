@@ -1,12 +1,27 @@
 
 public class vizUtils {
 	
+	public static double sanitizeBearing(double bear){
+		double bsign = Math.signum(bear);
+		double bmag  = Math.abs(bear)%360.0;
+		
+		return bsign*((bmag>180.0)?(bmag-360.0):bmag);
+	}
+	
+	public static double addBearing(double current, double delta){
+		return sanitizeBearing(current+delta);
+	}
+	public static double lerp(double a, double b, double t){
+		return (1.0-t)*a+t*b;
+	}
+	/*
 	public static double addBearing(double current, double delta){
 		double sum = current+delta;
 		if(sum >= 360.0) return sum % 360.0;
 		if(sum < 0.0)    return 360.0 + ( sum % 360 );
 		return sum;
 	}
+	*/
 	public static double addSpeed(double current, double delta){
 		return current+delta;
 	}

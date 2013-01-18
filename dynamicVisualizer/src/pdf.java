@@ -36,7 +36,7 @@ public class pdf {
 	
 	private void mkProbs(){
 		
-		System.err.println(":::"+min+":::"+max+":::");
+		//System.err.println(":::"+min+":::"+max+":::");
 		
 		double stddev_lte = Math.abs(center-min)/3.0;
 		double stddev_gt = Math.abs(max-center)/3.0;
@@ -91,7 +91,7 @@ public class pdf {
 		
 		area = ((max-min)/(2*probabilities.length))*sum;
 		
-		System.err.println("Pre area: " + area);
+		//System.err.println("Pre area: " + area);
 		
 		// Normalize probabilities
 		for(int i=0; i<probabilities.length; i++){
@@ -153,7 +153,7 @@ public class pdf {
 		dx = (center-min);///50.0;
 		dX = (max-center);///50.0;
 		
-		System.err.println("dx: " + dx + "      dX: " + dX);
+		//System.err.println("dx: " + dx + "      dX: " + dX);
 		
 		mkProbs();
 		mkAreas();
@@ -161,7 +161,9 @@ public class pdf {
 		
 	}
 	
+	//int count = 0;
 	public double generate(Random rand){
+		//System.err.println(count++);
 		double r = rand.nextDouble();
 		double t=0,tn=areas[0];
 		int i=0;
@@ -172,10 +174,10 @@ public class pdf {
 		
 		t = (r-t)/(tn-t);
 		
-		System.err.println("t: " + t);
+		//System.err.println("t: " + t);
 		
 		double dB = interp(i,t);
-		System.err.println("Bearing change: " + dB);
+		//System.err.println("Bearing change: " + dB);
 		return dB;
 		//return interp(i,t);
 	}
