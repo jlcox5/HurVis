@@ -1,5 +1,5 @@
 
 public interface pathStrategy {
-   public vec genDeltas(vec x, int day);
+   public vec genDeltas(vec x, double b, int day);
    public int getDays();
 }

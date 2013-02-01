@@ -2,10 +2,31 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Random;
 import java.util.Vector;
 
 
 public class Advisory {
+	
+	public boolean rightOf(vec lhs,vec rhs){
+		return (lhs.get(0)*rhs.get(1)-lhs.get(1)*rhs.get(0)) > 0.0;
+	}
+	public boolean leftOf(vec lhs,vec rhs){
+		return !rightOf(lhs,rhs);
+	}
+	
+	public boolean inBounds(vec x, int day){
+	  return rightOf( x.sub(leftBounds[day]), leftBounds[day+1].sub(leftBounds[day]) )
+		 &&   leftOf( x.sub(rightBounds[day]), rightBounds[day+1].sub(rightBounds[day]) );
+	}
+	
+	public boolean inCone(vec x){
+		for(int i=0; i < leftBounds.length-1; ++i)
+			if( !inBounds(x,i) ) return false;
+		return true;
+	}
+	
+	public Random rand = new Random();
 	
 	public double Bearing0, Speed0;
 	
@@ -66,6 +87,7 @@ public class Advisory {
     //private Bounds latlonframe = new Bounds(-100,17,25,16);
     //private Bounds latlonframe = new Bounds(-100,33,25,-15.5);
     private Bounds latlonframe = new Bounds(-100,17,25,16.0,true);
+    public Bounds getFrame(){return latlonframe;}
     public vec project(vec p){
     	return latlonframe.project(p);
     }
@@ -178,6 +200,9 @@ public class Advisory {
     		   line = in.readLine().trim();
     		   String[] svals = line.split("\\s+");
     		   double[]  vals = new double[svals.length];
+    		   
+			   for(int i=0; i < vals.length; ++i)
+					vals[i]=new Double(svals[i]);
     		   
     		   Bearing0 = vals[0];
     		   Speed0   = vals[1];

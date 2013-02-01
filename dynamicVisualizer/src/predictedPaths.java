@@ -11,9 +11,9 @@ public class predictedPaths implements pathStrategy {
 
 	Advisory adv;
 	
-	//double supportSpeed = 3.0;
+	double supportSpeed = 3.0;
 	double supportBearing = 1.5;
-	double supportSpeed = 0.0001;
+	//double supportSpeed = 0.0001;
 	//double supportBearing = 0.0001;
 	//double supportScale = (double)10e-2;
 	double supportScale = 1.0;
@@ -30,12 +30,10 @@ public class predictedPaths implements pathStrategy {
 	
 	public int N;
 	
-
-	Random rand = new Random();	
 	@Override
-	public vec genDeltas(vec x, int day) {
-		return vec.vec2(bearingPDFs.get(day).generate(rand)
-				       ,speedPDFs.get(day).generate(rand));
+	public vec genDeltas(vec x, double b, int day) {
+		return vec.vec2(bearingPDFs.get(day).generate(adv.rand)
+				       ,speedPDFs.get(day).generate(adv.rand));
 	}
 	
 	
@@ -92,6 +90,15 @@ public class predictedPaths implements pathStrategy {
 			   "maxB: "   +bearingPDFs.get(i).max
 					          );
 	}
+
+	public void printSpeedPDFs(){
+		for(int i=0;i<speedPDFs.size();++i)
+			System.err.println(
+			   "minS: "   +speedPDFs.get(i).min   +" ; "+
+			   "centerS: "+speedPDFs.get(i).center+" ; "+
+			   "maxS: "   +speedPDFs.get(i).max
+					          );
+	}
 	
 	private void swap(double[] ar, int a, int b){
 		double temp = ar[a];
@@ -137,8 +144,8 @@ public class predictedPaths implements pathStrategy {
 			//System.err.println("BEAR 0: " + adv.getBear(0));
 			//double c_s = (vizUtils.haversine(adv.getPos(0), adv.getPos(1))/adv.hoursInSeg())-(speed0=adv.getSpeed(0));
 			double c_s = (vizUtils.haversine(adv.getPos(0), adv.getPos(1))/adv.hoursInSeg())-(speed0);
-			double sL  = (vizUtils.haversine(adv.getLeft(0), adv.getLeft(1)))-speed0;
-			double sR  = (vizUtils.haversine(adv.getRight(0), adv.getRight(1)))-speed0;
+			double sL  = (vizUtils.haversine(adv.getLeft(0), adv.getLeft(1))/adv.hoursInSeg())-speed0;
+			double sR  = (vizUtils.haversine(adv.getRight(0), adv.getRight(1))/adv.hoursInSeg())-speed0;
 			//double m_s = c_s + supportSpeed()*(Math.min(sL,sR) - c_s);
 			//double M_s = c_s + supportSpeed()*(Math.max(sL,sR) - c_s);
 			double m_s = minSample(sL,c_s,sR,supportSpeed());
@@ -168,7 +175,7 @@ public class predictedPaths implements pathStrategy {
 			
 			double bL  = getBearingDelta(adv.getLeft(iprev), adv.getLeft(i), adv.getLeft(inext));
 			double bR  = getBearingDelta(adv.getRight(iprev),adv.getRight(i),adv.getRight(inext));
-			
+
 			//double m_b = c_b + supportBearing()*(Math.min(bL,bR) - c_b);
 			//double M_b = c_b + supportBearing()*(Math.max(bL,bR) - c_b);
 			double m_b = minSample(bL,c_b,bR,supportBearing());
@@ -198,5 +205,6 @@ public class predictedPaths implements pathStrategy {
 			speedPDFs.set(i,new pdf(m_s,M_s,c_s));
 	   }
 	   printBearingPDFs();
+	   printSpeedPDFs();
    }
 }

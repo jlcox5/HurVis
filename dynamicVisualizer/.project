@@ -41,6 +41,11 @@
 			<location>C:/Users/User/java/advisories/kat3Hr.txt</location>
 		</link>
 		<link>
+			<name>src/resolvedPost1945.txt</name>
+			<type>1</type>
+			<location>C:/Users/User/resolvedPost1945.txt</location>
+		</link>
+		<link>
 			<name>src/rita3Hr.txt</name>
 			<type>1</type>
 			<location>C:/Users/User/java/advisories/rita3Hr.txt</location>
