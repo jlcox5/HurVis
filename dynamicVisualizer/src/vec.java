@@ -15,7 +15,7 @@ public class vec {
 	   N = from.N;
 	   coords = (Vector<Double>) from.coords.clone();
    }
-public double dot(vec rhs){
+   public double dot(vec rhs){
 	   if( rhs.N != N ) return 0.0;
 	   
 	   double inner = 0.0;
@@ -110,5 +110,10 @@ public double dot(vec rhs){
 	  }
 	  ret += String.format("%.4f",get(N-1))+")";
 	  return ret;
+   }
+   public vec negate() {
+	   vec ret = new vec(N);
+	   for(int i=0; i < N; ++i) ret.set(i, -get(i));
+	   return ret;
    }
 }

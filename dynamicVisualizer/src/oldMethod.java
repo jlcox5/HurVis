@@ -72,9 +72,9 @@ public class oldMethod implements Visualizer {
 	Random rand = new Random(1337);
 	public oldMethod(){
 		adv = new Advisory("kat3Hr.txt");
-		System.err.println("FOO: "+adv.getPos(0));
+		//System.err.println("FOO: "+adv.getPos(0));
 		predicted = new predictedPaths(adv);
-		historical = new historicalPaths(adv,"resolvedPost1945.txt");
+		historical = new historicalPaths(adv,"resHistCur.txt");
 	   try {
 		hmap = ImageIO.read(this.getClass().getResource("hurricane_map_1.png"));
 	} catch (IOException e) {
@@ -115,11 +115,14 @@ public class oldMethod implements Visualizer {
 		Path p = new Path(pathTTL);
 		     p.nodes.add(adv.project(x0));
 		     
+		pathStrategy strat = historical;
+		//pathStrategy strat = predicted;
+		     
 		if(!once || oneshot){
 			//for(int i=0; i < predicted.getDays(); ++i){
 				   //vec delta = predicted.genDeltas(x0, b, i);
-		   for(int i=0; i < historical.getDays(); ++i){
-			   vec delta = historical.genDeltas(x0, b, i);
+		   for(int i=0; i < strat.getDays(); ++i){
+			   vec delta = strat.genDeltas(x0, b, i);
 			   s = vizUtils.addSpeed(s, delta.get(1));
 			   b = vizUtils.addBearing(b,delta.get(0));
 			   //if(i==0)System.err.println("delta - Bearing: " + delta.get(0) + " - " + b);

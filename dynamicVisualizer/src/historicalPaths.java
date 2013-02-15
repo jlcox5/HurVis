@@ -3,7 +3,7 @@ public class historicalPaths implements pathStrategy {
 	
 	public Advisory adv;
 	
-	public gridStruct grid;
+	public gridStruct2 grid;
 	public String     filename;
 	
 	public int N;
@@ -14,7 +14,7 @@ public class historicalPaths implements pathStrategy {
 		
 		filename = nfilename;
 		
-		grid = new gridStruct(adv,filename);
+		grid = new gridStruct2(adv,filename);
 	}
 
 	@Override
