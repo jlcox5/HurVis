@@ -1,5 +1,5 @@
 
-public class identityBin extends bin{
+public class identityBin implements bin{
 
 	@Override
 	public void resolve() {

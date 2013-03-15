@@ -30,19 +30,13 @@ public class gridStruct2 {
 		for(int i=0; i < binsPerCell; ++i) bar[i]=new gridbin();
 		
 		return bar;
-	}
-	bin[] newbin(int lon, int lat){
-		bin[] bar = new bin[binsPerCell];
-		for(int i=0; i < binsPerCell; ++i) bar[i]=new gridbin(lon,lat);
-		
-		return bar;
-	}
+	}	
 	
 	boolean exists(int i, int j){ return grid.containsKey(c(i,j)); }
 	boolean doesNotExist(int i, int j){ return !exists(i,j); }
 	
 	bin[] getBin(int i, int j){
-      if(doesNotExist(i,j)) grid.put(c(i,j), newbin(i,j));
+      if(doesNotExist(i,j)) grid.put(c(i,j), newbin());
       
       return grid.get( c(i,j) );
 	}
@@ -79,10 +73,8 @@ public class gridStruct2 {
 		adv = nadv;
 		filename = nfilename;
 
-		//degLat = Math.abs((int)adv.getFrame().height);
-		//degLon = Math.abs((int)adv.getFrame().width);
-		degLat = Math.abs((int)adv.getFrame().height)+1;
-		degLon = Math.abs((int)adv.getFrame().width)+1;
+		degLat = Math.abs((int)adv.getFrame().height);
+		degLon = Math.abs((int)adv.getFrame().width);
 		minLat = (int)adv.getFrame().y;
 		minLon = (int)adv.getFrame().x;
 		maxLat = minLat+degLat;
@@ -101,36 +93,21 @@ public class gridStruct2 {
 
 		loadFile();
 		
-		{
-			//bin[] bins = getBin(-85,24); for(int c=0; c < binsPerCell; ++c) bins[c].DBUG();
-			
-			//bin[]bins = getBin(-90,24); for(int c=0; c < binsPerCell; ++c) bins[c].DBUG();
-		}
-		System.err.println("---------------------------------------------");
 		Iterator<bin[]> i = grid.values().iterator();
 		bin[] bins = null;
 		for(bins = i.next(); i.hasNext(); bins=i.next())
 			for(int c=0; c < binsPerCell; ++c) bins[c].resolve();
 		for(int c=0; c < binsPerCell; ++c) bins[c].resolve();
-		System.err.println("---------------------------------------------");
+
 		//for(int i=-10; i < degLon+10; ++i)
 	    //  for(int j=-10; j < degLat+10; ++j)
-	    //    if( exists(i,j) ) for( int c=0; c < binsPerCell; ++c ) getBin(i,j,c).resolve();			  
+	    //    if( exists(i,j) ) for( int c=0; c < binsPerCell; ++c ) getBin(i,j,c).resolve(); 
+			  
 		
-		/*
 		printNode(-85,24);
 		printNode(-84,24);
 		printNode(-85,25);
 		printNode(-84,25);
-		{
-			System.err.println("-=-=-=-=-=-=-=-=-=-");
-			bin[] dbins = getBin(-89,25);
-			for(int c=0; c < binsPerCell; ++c)
-			   System.err.println(((gridbin)dbins[c]).pointlist.size());
-			System.err.println("-=-=-=-=-=-=-=-=-=-");
-		}
-		printNode(-90,24);
-		*/
 	}
 	
 	public bin findBin(vec x, double b){
@@ -194,8 +171,8 @@ public class gridStruct2 {
 					gridPoint npoint = new gridPoint(vals[0],vals[1],vals[2],vals[3],vals[4],vals[5],vals[6]);
 					//Speed check?
 					//System.err.println(""+(clat)+" "+(clon)+" "+cbin);
-					//System.err.println("!: "+clat+" "+clon+" "+cbin);
-					getBin(clon, clat, cbin).add(npoint);
+					System.err.println("!: "+clat+" "+clon+" "+cbin);
+					getBin(clon-LonShift, clat-LatShift, cbin).add(npoint);
 					//getBin(clat-LatShift, clon-LonShift, cbin).add(npoint);
 					break;
 				default:

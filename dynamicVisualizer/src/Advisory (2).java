@@ -86,7 +86,6 @@ public class Advisory {
     
     //private Bounds latlonframe = new Bounds(-100,17,25,16);
     //private Bounds latlonframe = new Bounds(-100,33,25,-15.5);
-    //private Bounds latlonframe = new Bounds(-100,17,25,16.0,true);
     private Bounds latlonframe = new Bounds(-100,17,25,16.0,true);
     public Bounds getFrame(){return latlonframe;}
     public vec project(vec p){

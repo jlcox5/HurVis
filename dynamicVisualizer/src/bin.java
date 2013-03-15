@@ -1,24 +1,27 @@
 
-public interface bin {
+public abstract class bin {
 
-	void resolve();
+	abstract void resolve();
 
-	void add(gridPoint npoint);
+	abstract void add(gridPoint npoint);
 
-	double genBearingDelta(double nextDouble);
+	abstract double genBearingDelta(double nextDouble);
 
-	double genSpeedDelta(double nextDouble);
+	abstract double genSpeedDelta(double nextDouble);
 
-	void printBDF();
+	abstract void printBDF();
 
-	void printBP();
+	abstract void printBP();
 
-	void printSDF();
+	abstract void printSDF();
 
-	void printSP();
+	abstract void printSP();
 
-	void printSF();
+	abstract void printSF();
 
-	void printBF();
+	abstract void printBF();
+	
+	boolean _debug=false;
+	void DBUG(){_debug=true;}
 
 }

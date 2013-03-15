@@ -3,14 +3,8 @@ import java.util.List;
 import java.math.*;
 
 
-public class gridbin extends bin {
+public class gridbin implements bin {
    ArrayList<gridPoint> pointlist = new ArrayList<gridPoint>();
-   
-   public double[] initArray(){
-	   double[] narr = new double[samples];
-	   for(int i=0; i < samples; ++i) narr[i] = 0.0;
-	   return narr;
-   }
    
    public double[] predStartTime;
    public double[] predFinishTime;
@@ -25,20 +19,14 @@ public class gridbin extends bin {
    double hB, hS;
    double maxB, minB;
    double maxS, minS;
-   double priorMinB, priorMaxB;
-   double priorMinS, priorMaxS;
    int samples=11;
    boolean hasPrePath;
    double areaB, areaS;
    
    int N=0;
+
    
-   boolean DBUG = false;
-   int lat=-666,lon=-666;
-   
-   public gridbin(){}
-   public gridbin(int nlon, int nlat){
-	   lat=nlat; lon=nlon;
+   public gridbin(){
    }
    
    public void add(gridPoint gp){
@@ -78,9 +66,8 @@ public class gridbin extends bin {
    }
    
    public double genSpeedDelta(double r){
-	   //if(N==0 || areaS == 0.0) return 0.0;
 	   if(N==0) return 0.0;
-	   if(N==1) return speedPos[0]*3.0;	   
+	   if(N==1) return speedPos[0]*3.0;
 	   
 	   int k=0;
 	   
@@ -104,7 +91,6 @@ public class gridbin extends bin {
 	   
 	   rangeL = (rangeL+rangeT*arearatio)%360.0;
 	   
-	   //if(areaS == 0.0) System.err.println("BOGUS: "+3.0*rangeL);
 	   return 3.0*rangeL;
    }
    
@@ -112,28 +98,6 @@ public class gridbin extends bin {
 	   double meanB,meanS,tSum,uSum;
 	   double k = 1.0;
 	   
-	   //if(pointlist.size() == 28 && lon==-77) System.err.println(lon + " " + lat);
-	   
-	   int size = pointlist.size();
-	   //predStartTime  = new double[samples];
-	   //predFinishTime = new double[samples];
-	   //bearDistFunc   = new double[samples];
-	   //speedDistFunc  = new double[samples];
-	   //bearF          = new double[samples];
-	   //speedF         = new double[samples];
-	   //bearPos        = new double[samples];
-	   //speedPos       = new double[samples];
-	   
-	   predStartTime   = initArray();
-	   predFinishTime  = initArray();
-	   bearDistFunc    = initArray();
-	   speedDistFunc   = initArray();
-	   bearF           = initArray();
-	   speedF          = initArray();
-	   bearPos         = initArray();
-	   speedPos        = initArray();
-	   
-	   if(_debug) System.err.println("Pointlist size: " + size);
 	   if(pointlist.size() == 0) return;
 	   
 	   //meanB=pointlist.get(0).bdel;
@@ -143,18 +107,11 @@ public class gridbin extends bin {
 	   maxB = minB = pointlist.get(0).bdel;
 	   maxS = minS = pointlist.get(0).sdel;
 	   
-	   //meanB = maxB = minB = pointlist.get(0).bdel;
-	   //meanS = maxS = minS = pointlist.get(0).sdel;
-	   
 	   for(int i=1; i < pointlist.size(); ++i){
 		   maxB = Math.max(maxB, pointlist.get(i).bdel);
-		   // Changed by Jon
-		   //minB = Math.min(maxB, pointlist.get(i).bdel);
-		   minB = Math.min(minB, pointlist.get(i).bdel);
+		   minB = Math.min(maxB, pointlist.get(i).bdel);
 		   maxS = Math.max(maxS, pointlist.get(i).sdel);
-		   // Changed by Jon
-		   //minS = Math.min(maxS, pointlist.get(i).sdel);
-		   minS = Math.min(minS, pointlist.get(i).sdel);
+		   minS = Math.min(maxS, pointlist.get(i).sdel);
 		   
 		   meanB += pointlist.get(i).bdel;
 		   meanS += pointlist.get(i).sdel;
@@ -182,25 +139,25 @@ public class gridbin extends bin {
 	   if(wS > 0.0) hS = k*Math.sqrt(uSum);
 	   else hS =0.0;
 	   
-	   priorMinB = minB;
-	   priorMaxB = maxB;
-	   priorMinS = minS;
-	   priorMaxS = maxS;
-	   
 	   minB -= 3.0*hB;
 	   maxB += 3.0*hB;
 	   minS -= 3.0*hS;
 	   maxS += 3.0*hS;
+	   
+	   int size = pointlist.size();
+	   predStartTime  = new double[samples];
+	   predFinishTime = new double[samples];
+	   bearDistFunc   = new double[samples];
+	   speedDistFunc  = new double[samples];
+	   bearF          = new double[samples];
+	   speedF         = new double[samples];
+	   bearPos        = new double[samples];
+	   speedPos       = new double[samples];
        
 	   genBearDif();
 	   computeAreaB();
 	   genSpeedDif();
 	   computeAreaS();
-	   
-	   //if( areaS != 0.0 && Math.abs(areaS-1.0) > 0.01 ) System.err.println("Bad Speed Area:   " + areaS);
-	   //if( areaB != 0.0 && Math.abs(areaB-1.0) > 0.01 ) System.err.println("Bad Bearing Area: " + areaB);
-	   
-	   //if( areaS == 0.0 ) System.err.println("ZERO! Pointlist size: " + pointlist.size());
    }
 
    public double findKB(double x){
@@ -279,7 +236,7 @@ public class gridbin extends bin {
 	   double N = bearF.length;
 	   
 	   double sum = bearF[0];
-	   for(int i=1; i < bearF.length-1; ++i) sum += 2.0*bearF[i];
+	   for(int i=1; i < bearF.length-1; ++i) sum += 2*bearF[i];
 	   sum += bearF[bearF.length-1];
 	   
 	   aV = minB;
@@ -305,8 +262,7 @@ public class gridbin extends bin {
 		   for(int i=1; i < bearF.length-1; ++i) sum += 2.0*bearF[i];
 		   sum += bearF[bearF.length-1];
 		   		   
-		   //if( N != 0.0) areaB = ((bV-aV)/(2.0*N))*sum;
-		   areaB = (N!=0.0)?((bV-aV)/(2.0*N))*sum:0.0;
+		   if( N != 0.0) areaB = ((bV-aV)/(2.0*N))*sum;
 	   }
 	   
 	   double k=1.0;
@@ -333,19 +289,13 @@ public class gridbin extends bin {
 	   double N = speedF.length;
 	   
 	   double sum = speedF[0];
-	   for(int i=1; i < speedF.length-1; ++i) sum += 2.0*speedF[i];
+	   for(int i=1; i < speedF.length-1; ++i) sum += 2*speedF[i];
 	   sum += speedF[speedF.length-1];
 	   
 	   aV = minS;
 	   bV = maxS;
 	   
 	   areaS = (N!=0.0)?((bV-aV)/(2.0*N))*sum:0.0;
-	   
-	   //if(areaS == 0.0){
-	//	   System.err.println("--------------BOGUS---------------");
-	//	   for(int i=0; i < speedF.length; ++i) System.err.println(speedF[i]);
-	//	   System.err.println("----------------------------------");
-	 //  }
 	   
 	   double invAreaS = 1.0/areaS;
 	   
@@ -365,8 +315,7 @@ public class gridbin extends bin {
 		   for(int i=1; i < speedF.length-1; ++i) sum += 2.0*speedF[i];
 		   sum += speedF[speedF.length-1];
 		   		   
-		   //if( N != 0.0) areaS = ((bV-aV)/(2.0*N))*sum;
-		   areaS = (N!=0.0)?((bV-aV)/(2.0*N))*sum:0.0;
+		   if( N != 0.0) areaS = ((bV-aV)/(2.0*N))*sum;
 	   }
 	   
 	   double k=1.0;
@@ -442,23 +391,8 @@ public void printBP() {
 	for(int i=0; i < bearPos.length; ++i) System.err.print(bearPos[i]+", ");
 }
 
-public void printPoints(){
-    for(int i=0; i < pointlist.size(); i++){
-      System.err.println("  sDeL: " + pointlist.get(i).sdel + "     bDel: " + pointlist.get(i).bdel);	
-    }
-}
-
 @Override
 public void printBF() {
-	/*
-	System.err.println("bin size: " + pointlist.size());
-	System.err.println("priorMinB: " + priorMinB + "     priorMaxB: " + priorMaxB);
-	System.err.println("priorMinS: " + priorMinS + "     priorMaxS: " + priorMaxS);
-	System.err.println("hB: " + hB + "     hS: " + hS);
-	System.err.println("minB: " + minB + "   maxB: " + maxB);
-	System.err.println("minS: " + minS + "   maxS: " + maxS);
-	*/
-	//printPoints();
 	for(int i=0; i < bearF.length; ++i) System.err.print(bearF[i]+", ");
 }
 
