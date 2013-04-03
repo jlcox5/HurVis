@@ -1,11 +1,18 @@
 
 public class vizUtils {
 	
+	public static double fromTrueNorth(double bear){
+		return sanitizeBearing(bear-90.0);
+	}
+	
 	public static double sanitizeBearing(double bear){
-		double bsign = Math.signum(bear);
-		double bmag  = Math.abs(bear)%360.0;
+		//double bsign = Math.signum(bear);
+		//double bmag  = Math.abs(bear)%360.0;
 		
-		return bsign*((bmag>180.0)?(bmag-360.0):bmag);
+		//return bsign*((bmag>180.0)?(bmag-360.0):bmag);
+		boolean neg = bear<0.0;
+		bear = Math.abs(bear)%360.0;
+		return neg?360.0-bear:bear;
 	}
 	
 	public static double addBearing(double current, double delta){

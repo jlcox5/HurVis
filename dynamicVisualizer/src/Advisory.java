@@ -158,6 +158,12 @@ public class Advisory {
     public double getSpeed(int i){
     	return pathdata.get(i).get(3);
     }
+    public double getInitialBearing(){
+    	return Bearing0;
+    }
+    public double getInitialSpeed(){
+    	return Speed0;
+    }
     
     public Advisory(String advfile){
     	/*
