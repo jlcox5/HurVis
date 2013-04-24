@@ -90,8 +90,8 @@ public class oldMethod implements Visualizer {
 	private static final int pathTTL = 150;
 	
 	private static boolean extinction = true;
-	private static boolean once = true;
-	private static boolean oneshot = true;
+	private static boolean once = false;
+	private static boolean oneshot = false;
 	
 	@Override
 	public void Update() {
@@ -110,6 +110,7 @@ public class oldMethod implements Visualizer {
 		vec    x1;
 		vec    x0 = adv.getPos(0);
 		double s = adv.getInitialSpeed();
+		//double b = vizUtils.sanitizeBearing(adv.getInitialBearing());
 		double b = vizUtils.sanitizeBearing(adv.getInitialBearing());
 		
 		Path p = new Path(pathTTL);
@@ -117,6 +118,8 @@ public class oldMethod implements Visualizer {
 		     
 		pathStrategy strat = historical;
 		//pathStrategy strat = predicted;
+		//pathStrategy strat = predicted;
+		boolean report = false;
 		     
 		if(!once || oneshot){
 			//for(int i=0; i < predicted.getDays(); ++i){
@@ -124,19 +127,25 @@ public class oldMethod implements Visualizer {
 		   for(int i=0; i < strat.getDays(); ++i){
 			   vec delta = strat.genDeltas(x0, b, i);
 			   
-			   System.err.println("-----------------");
-			   System.err.println("Bearing, Delta: " + b + ", " + delta.get(0));
-			   System.err.println("Lat/Lon (0): " + x0.get(0) + "/" + x0.get(1));
+			   if( report ){
+			     System.err.println("-----------------");
+			     System.err.println("Bearing, Delta: " + b + ", " + delta.get(0));
+			     System.err.println("Speed, Delta: " + s + ", " + delta.get(1));
+			     System.err.println("Lat/Lon (0): " + x0.get(0) + "/" + x0.get(1));
+			   }
 			   
 			   s = vizUtils.addSpeed(s, delta.get(1));
-			   System.err.println("     Old B: " + b + "   Delta: " + delta.get(0));
+			   //HACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACK
+			   s = adv.getInitialSpeed();
+			   //HACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACK
+			   if( report ) System.err.println("     Old B: " + b + "   Delta: " + delta.get(0));
 			   b = vizUtils.addBearing(b,delta.get(0));
-			   System.err.println("     New B: " + b);
+			   if( report ) System.err.println("     New B: " + b);
 			   //if(i==0)System.err.println("delta - Bearing: " + delta.get(0) + " - " + b);
 			   double dist = s*adv.hoursInSeg();
 			   //System.err.println(""+b+" "+s);
 			   x1 = vizUtils.spherical_translation(x0, dist, b);
-			   System.err.println("Lat/Lon (1): " + x1.get(0) + "/" + x1.get(1));
+			   if( report ) System.err.println("Lat/Lon (1): " + x1.get(0) + "/" + x1.get(1));
 			
 			   p.nodes.add(adv.project(x1));
 			

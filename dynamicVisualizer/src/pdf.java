@@ -161,18 +161,21 @@ public class pdf {
 		
 	}
 	
-	//int count = 0;
+	static int count = 5;
 	public double generate(Random rand){
+		if(count-- > 0) System.err.println(area);
 		//System.err.println(count++);
 		double r = rand.nextDouble();
 		double t=0,tn=areas[0];
 		int i=0;
-		while(tn<r && i < 100){
+		while(tn<r && i < 99){
 			t = tn;
 			tn += areas[i++];
 		}
-		
+
 		t = (r-t)/(tn-t);
+		
+		//System.err.println(t+" "+tn+" "+r);
 		
 		//System.err.println("t: " + t);
 		

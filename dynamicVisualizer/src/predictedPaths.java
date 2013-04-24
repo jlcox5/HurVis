@@ -51,7 +51,9 @@ public class predictedPaths implements pathStrategy {
 	
 	double _getBearingDelta(double bi, double bf){		
 		double bdel = bf-bi;
-		return vizUtils.sanitizeBearing(bdel);
+		return bdel;
+		///if(true==true)return vizUtils.fromTrueNorth(bdel);
+		///return vizUtils.sanitizeBearing(bdel);
 		//double bdel = minDiff(bi,bf);
 		
 		////double bsign = Math.signum(bdel);

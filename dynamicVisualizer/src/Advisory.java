@@ -213,6 +213,7 @@ public class Advisory {
     		   
     		   Bearing0 = vals[0];
     		   Speed0   = vals[1];
+    		   //System.err.println("SPEEEEEED " + Speed0);
     		}
 			while(in.ready() && (line = in.readLine().trim()) != "" && line != "\n"){
 				String[] svals = line.split("\\s+");
