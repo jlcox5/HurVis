@@ -11,7 +11,7 @@ public class predictedPaths implements pathStrategy {
 
 	Advisory adv;
 	
-	double supportSpeed = 3.0;
+	double supportSpeed = 1.0;
 	double supportBearing = 1.5;
 	//double supportSpeed = 0.0001;
 	//double supportBearing = 0.0001;
@@ -34,6 +34,8 @@ public class predictedPaths implements pathStrategy {
 	public vec genDeltas(vec x, double b, int day) {
 		return vec.vec2(bearingPDFs.get(day).generate(adv.rand)
 				       ,speedPDFs.get(day).generate(adv.rand));
+		//return vec.vec2(bearingPDFs.get(day).generate(adv.rand)
+		//		       ,1.0);
 	}
 	
 	
@@ -44,14 +46,22 @@ public class predictedPaths implements pathStrategy {
 	
 	double getSpeedDelta(vec p0, vec p1, vec p2, double dt0, double dt1){
 		double sf = vizUtils.haversine(p1,p2)/dt1;
-		double si = vizUtils.haversine(p0, p1)/dt0;
+		double si = vizUtils.haversine(p0,p1)/dt0;
 		
 		return sf-si;
 	}
 	
-	double _getBearingDelta(double bi, double bf){		
-		double bdel = bf-bi;
-		return bdel;
+	double _getBearingDelta(double bi, double bf){
+		double toRet;
+		
+		toRet = bf - bi;
+		if(toRet > 180){
+			toRet = toRet - 360;
+		}
+		if(toRet < -180){
+			toRet = toRet + 360;
+		}
+		return toRet;
 		///if(true==true)return vizUtils.fromTrueNorth(bdel);
 		///return vizUtils.sanitizeBearing(bdel);
 		//double bdel = minDiff(bi,bf);
@@ -65,7 +75,9 @@ public class predictedPaths implements pathStrategy {
 	
 	double getBearingDelta(vec p0, vec p1, vec p2){
 		double bf = vizUtils.findBearing_2(p1, p2);
-		double bi = 180.0+vizUtils.findBearing_2(p1, p0);
+		double bi = (180.0+vizUtils.findBearing_2(p1, p0))%360.0;
+		
+		System.err.println("     bf: " + bf + "     bi: " + bi);
 		
 		return _getBearingDelta(bi,bf);
 	}
@@ -125,10 +137,10 @@ public class predictedPaths implements pathStrategy {
 		speedPDFs.setSize(N);
 		
 		{
-			//double bear0  = adv.Bearing0;
-			double bear0  = adv.getBear(0);
-			//double speed0 = adv.Speed0;
-			double speed0 = adv.getSpeed(0);
+			double bear0  = adv.Bearing0;
+			//double bear0  = adv.getBear(0);
+			double speed0 = adv.Speed0;
+			//double speed0 = adv.getSpeed(0);
 			//double c_b = _getBearingDelta(bear0=adv.getBear(0),vizUtils.findBearing_2(adv.getPos(0), adv.getPos(1)));
 			double c_b = _getBearingDelta(bear0,vizUtils.findBearing_2(adv.getPos(0), adv.getPos(1)));
 			double bL  = _getBearingDelta(bear0,vizUtils.findBearing_2(adv.getLeft(0),adv.getLeft(1)));
@@ -138,9 +150,10 @@ public class predictedPaths implements pathStrategy {
 			double m_b = minSample(bL,c_b,bR,supportBearing());
 			double M_b = maxSample(bL,c_b,bR,supportBearing());
 			
-			System.err.println("Bear PDF 0 - Min: " + m_b + "   Cen: " + c_b + "   Max: " + M_b);
+			//System.err.println("Bear PDF 0 - Min: " + m_b + "   Cen: " + c_b + "   Max: " + M_b);
 			
             bearingPDFs.set(0,new pdf(m_b,M_b,c_b));
+            //bearingPDFs.get(0).Display();
             //System.exit(0);
             //bearingPDFs.get(0).Display();
 			//System.err.println("BEAR 0: " + adv.getBear(0));
@@ -153,12 +166,13 @@ public class predictedPaths implements pathStrategy {
 			double m_s = minSample(sL,c_s,sR,supportSpeed());
 			double M_s = maxSample(sL,c_s,sR,supportSpeed());
 			
-			{
+			System.err.println("Speed PDF 0 - Min: " + m_s + "   Cen: " + c_s + "   Max: " + M_s);
+			/*{
 			   double[] san = sanitizePDF_Params(m_s,c_s,M_s);
 			   m_s = san[0];
 			   c_s = san[1];
 			   M_s = san[2];
-			}
+			}*/
 			
 			speedPDFs.set(0,new pdf(m_s,M_s,c_s));
 			
@@ -173,22 +187,30 @@ public class predictedPaths implements pathStrategy {
 			int iprev = Math.max(0,i-1);
 			int inext = i+1;
 			
-			double c_b = getBearingDelta(adv.getPos(iprev), adv.getPos(i), adv.getPos(inext));
+			//double c_b = getBearingDelta(adv.getPos(iprev), adv.getPos(i), adv.getPos(inext));
+			double c_b = adv.getBear(i);
 			
 			double bL  = getBearingDelta(adv.getLeft(iprev), adv.getLeft(i), adv.getLeft(inext));
 			double bR  = getBearingDelta(adv.getRight(iprev),adv.getRight(i),adv.getRight(inext));
+			/*if(i == 15 || i == 16){
+			  System.err.println("Left   prev: " + adv.getLeft(iprev) + "  cur: " + adv.getLeft(i) + "   next: " + adv.getLeft(inext));
+			  System.err.println("Right  prev: " + adv.getRight(iprev) + "  cur: " + adv.getRight(i) + "   next: " + adv.getRight(inext));
+			  System.err.println("bL: " + bL + "   bR: " + bR);
+			}*/
 
 			//double m_b = c_b + supportBearing()*(Math.min(bL,bR) - c_b);
 			//double M_b = c_b + supportBearing()*(Math.max(bL,bR) - c_b);
 			double m_b = minSample(bL,c_b,bR,supportBearing());
 			double M_b = maxSample(bL,c_b,bR,supportBearing());
 			
+			//System.err.println("Bear PDF " + i + " - Min: " + m_b + "   Cen: " + c_b + "   Max: " + M_b);
             bearingPDFs.set(i,new pdf(m_b,M_b,c_b));
             
 			//double c_s = getSpeedDelta(adv.getPos(iprev),adv.getPos(i),adv.getPos(inext),adv.hoursInSeg(iprev),adv.hoursInSeg(i));
 			//double sL  = getSpeedDelta(adv.getLeft(iprev),adv.getLeft(i),adv.getLeft(inext),adv.hoursInSeg(iprev),adv.hoursInSeg(i));
 			//double sR  = getSpeedDelta(adv.getRight(iprev),adv.getRight(i),adv.getRight(inext),adv.hoursInSeg(iprev),adv.hoursInSeg(i));
-			double c_s = getSpeedDelta(adv.getPos(iprev),adv.getPos(i),adv.getPos(inext),adv.hoursInSeg(),adv.hoursInSeg());
+			//double c_s = getSpeedDelta(adv.getPos(iprev),adv.getPos(i),adv.getPos(inext),adv.hoursInSeg(),adv.hoursInSeg());
+            double c_s = adv.getSpeed(i);
 			double sL  = getSpeedDelta(adv.getLeft(iprev),adv.getLeft(i),adv.getLeft(inext),adv.hoursInSeg(),adv.hoursInSeg());
 			double sR  = getSpeedDelta(adv.getRight(iprev),adv.getRight(i),adv.getRight(inext),adv.hoursInSeg(),adv.hoursInSeg());
 			
@@ -197,13 +219,13 @@ public class predictedPaths implements pathStrategy {
 			double m_s = minSample(sL,c_s,sR,supportSpeed());
 			double M_s = maxSample(sL,c_s,sR,supportSpeed());
 			
-			{
+			/*{
 				   double[] san = sanitizePDF_Params(m_s,c_s,M_s);
 				   m_s = san[0];
 				   c_s = san[1];
 				   M_s = san[2];
-			}
-			
+			}*/
+			System.err.println("Speed PDF " + i + " - Min: " + m_s + "   Cen: " + c_s + "   Max: " + M_s);
 			speedPDFs.set(i,new pdf(m_s,M_s,c_s));
 	   }
 	   printBearingPDFs();

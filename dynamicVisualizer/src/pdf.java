@@ -26,7 +26,13 @@ public class pdf {
 	}
 	
 	public double value(int i){
-		return i<=50?min+((double)i/50)*dx:center+((double)(100-i)/50)*dX;
+		if(i <= 50){
+			return min+((double)i/50)*dx;
+		}
+		if(i == 50){
+			return center;
+		}
+		return center+((double)(i-50)/50)*dX;
 	}
 	
 	public double interp(int i, double t){
@@ -125,13 +131,16 @@ public class pdf {
 	}
 	
 	public void Display(){
-		System.err.println("AREAS:");
+		/*System.err.println("AREAS:");
 		System.err.println("_____________________________");
-		for(int i=0; i < 100; ++i) System.err.println((i==50)?"[+]"+areas[i]:areas[i]);
+		for(int i=0; i < 101; ++i) System.err.println((i==50)?"[+]"+areas[i]:areas[i]);
 		System.err.println("_____________________________");
 		System.err.println("PROBS:");
 		System.err.println("_____________________________");
-		for(int i=0; i < 100; ++i) System.err.println((i==50)?"[+]"+probabilities[i]:probabilities[i]);
+		for(int i=0; i < 101; ++i) System.err.println((i==50)?"[+]"+probabilities[i]:probabilities[i]);
+		System.err.println("_____________________________");*/
+		System.err.println("_____________________________");
+		for(int i=0; i < 101; ++i) System.err.println((i==50)?"[+]"+value(i):value(i));
 		System.err.println("_____________________________");
 	}
 	
@@ -158,6 +167,7 @@ public class pdf {
 		mkProbs();
 		mkAreas();
 		//mkNormal();
+		//this.Display();
 		
 	}
 	
@@ -166,9 +176,10 @@ public class pdf {
 		if(count-- > 0) System.err.println(area);
 		//System.err.println(count++);
 		double r = rand.nextDouble();
+		//r = 1.0;
 		double t=0,tn=areas[0];
 		int i=0;
-		while(tn<r && i < 99){
+		while(tn<r && i < 101){
 			t = tn;
 			tn += areas[i++];
 		}

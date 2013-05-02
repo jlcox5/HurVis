@@ -213,7 +213,7 @@ public class Advisory {
     		   
     		   Bearing0 = vals[0];
     		   Speed0   = vals[1];
-    		   //System.err.println("SPEEEEEED " + Speed0);
+    		   System.err.println("Bearing0: " + vals[0]);
     		}
 			while(in.ready() && (line = in.readLine().trim()) != "" && line != "\n"){
 				String[] svals = line.split("\\s+");
@@ -222,6 +222,7 @@ public class Advisory {
 					vals[i]=new Double(svals[i]);
 				
 				//if(count++!=0)
+				System.err.println(vals[LON] + " " + vals[LAT] + " " + vals[BEARING] + " " + vals[SPEED]);
 				pathdata.add(vec.vec4(vals[LON], vals[LAT], vals[BEARING], vals[SPEED]));
 				//pathdata.add(vec.vec2(vals[LON], vals[LAT]));
 			}
@@ -288,7 +289,7 @@ public class Advisory {
     	   vec p0 = d0.head(2);
     	   vec p1 = d1.head(2);
     	   
-    	   double bearO = vizUtils.findBearing_2(p0,p1);
+    	   double bearO = (vizUtils.findBearing_2(p1,p0)+180)%360;
     	   //double bearL = bearO < 90.0 ? bearO + 270.0 : bearO - 90.0;
     	   //double bearR = (bearO + 90.0) % 360.0;
     	   double bearL = vizUtils.sanitizeBearing(bearO - 90.0);
@@ -298,6 +299,8 @@ public class Advisory {
     	   //rightErrProto[i+1] = vizUtils.spherical_translation(p1, getErrorSegi(i), bearR);
     	   leftErrProto[i+1] = vizUtils.spherical_translation(p1, getErrorDayi(i+1), bearL);
     	   rightErrProto[i+1] = vizUtils.spherical_translation(p1, getErrorDayi(i+1), bearR);
+    	   
+    	   System.err.println("lefErr " + (i+1) + ": " + leftErrProto[i+1]);
     	   
     	   lastCursor=thisCursor;
        }
@@ -353,5 +356,11 @@ public class Advisory {
     	   rightBounds[i+1] = vizUtils.spherical_translation(p1, getErrorSegi(i), bearR);
        }
 */
+       for(int j = 0; j < rightBounds.length; j++){
+    	   System.err.println("RightBounds[" + j + "]: " + rightBounds[j]);
+       }
+       for(int j = 0; j < leftBounds.length; j++){
+    	   System.err.println("leftBounds[" + j + "]: " + leftBounds[j]);
+       }
     }
 }

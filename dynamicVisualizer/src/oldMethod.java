@@ -71,7 +71,8 @@ public class oldMethod implements Visualizer {
 	
 	Random rand = new Random(1337);
 	public oldMethod(){
-		adv = new Advisory("rita3Hr.txt");
+		//adv = new Advisory("rita3Hr.txt");
+		adv = new Advisory("kat3Hr.txt");
 		//System.err.println("FOO: "+adv.getPos(0));
 		predicted = new predictedPaths(adv);
 		historical = new historicalPaths(adv,"resHistCur.txt");
@@ -128,7 +129,7 @@ public class oldMethod implements Visualizer {
 			   vec delta = strat.genDeltas(x0, b, i);
 			   
 			   if( report ){
-			     System.err.println("-----------------");
+			     System.err.println("----------------- " + i + " -----------------");
 			     System.err.println("Bearing, Delta: " + b + ", " + delta.get(0));
 			     System.err.println("Speed, Delta: " + s + ", " + delta.get(1));
 			     System.err.println("Lat/Lon (0): " + x0.get(0) + "/" + x0.get(1));
@@ -136,7 +137,7 @@ public class oldMethod implements Visualizer {
 			   
 			   s = vizUtils.addSpeed(s, delta.get(1));
 			   //HACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACK
-			   s = adv.getInitialSpeed();
+			   //s = adv.getInitialSpeed();
 			   //HACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACKHACK
 			   if( report ) System.err.println("     Old B: " + b + "   Delta: " + delta.get(0));
 			   b = vizUtils.addBearing(b,delta.get(0));
