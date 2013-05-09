@@ -52,25 +52,28 @@ public class gridStruct2 {
 	//Fix negative bins by modulating bearing to be positive
 	bin getBinOrDont(int i, int j, int c){ return grid.get( c(i,j) )[c]; }
 	
+	//Indexing is apparently longitude,latitude
 	void printNode(int i, int j){
 		bin[] bins = getBin(i,j);
 		
 		System.err.println("Grid Lat Lon: " + j + ", " + i);
 		for(int c=0; c < binsPerCell; ++c){
 		  System.err.println("   bin: " + c);
+		  System.err.println("   Original Area: " + bins[c].getOriginalArea() );
+		  System.err.println("   Revised  Area: " + bins[c].getRevisedArea() );
 		  System.err.println("      Bearing:");
 		  System.err.print  ("         Value:        ");
 		  bins[c].printBP();
 		  System.err.println();
 		  System.err.print  ("         Segment Area: ");
-		  bins[c].printBF();
+		  bins[c].printBDF();
 		  System.err.println();
 		  System.err.println("      Speed:");
 		  System.err.print  ("         Value:        ");
 		  bins[c].printSP();
 		  System.err.println();
 		  System.err.print  ("         Segment Area: ");
-		  bins[c].printSF();
+		  bins[c].printSDF();
 		  System.err.println();
 		}
 	}
@@ -100,11 +103,21 @@ public class gridStruct2 {
 		grid = new HashMap< coord, bin[] >((int)(1.25f*(float)degLat*(float)degLon), 0.8001f);
 
 		loadFile();
+		System.err.println("Lattitude: 24");
+		System.err.println("     Longitude: -85");
+		for(int i=0; i < 5; ++i){
+			System.err.println("          Bin size: "+((double)i)*60.0+" - "+((double)i+1.0)*60.0);
+		    getBin(-85,24)[i].printpoints2();
+		}
 		
 		{
 			//bin[] bins = getBin(-85,24); for(int c=0; c < binsPerCell; ++c) bins[c].DBUG();
 			
 			//bin[]bins = getBin(-90,24); for(int c=0; c < binsPerCell; ++c) bins[c].DBUG();
+		}
+		{
+			//for(int i=0;i<6;++i)getBin(-85,24)[i].DBUG();
+			getBin(-85,24)[1].DBUG();
 		}
 		System.err.println("---------------------------------------------");
 		Iterator<bin[]> i = grid.values().iterator();
@@ -131,6 +144,10 @@ public class gridStruct2 {
 		}
 		printNode(-90,24);
 		*/
+		printNode(-85,24);
+		//printNode(-85,25);
+		//printNode(-84,24);
+		//printNode(-84,25);
 	}
 	
 	public bin findBin(vec x, double b){
@@ -175,14 +192,18 @@ public class gridStruct2 {
 			//}
 			while(in.ready() && (line = in.readLine().trim()) != "" && line != "\n"){
 				String[] svals = line.split("\\s+");
-
+                int state=0;
 				switch(svals[0]){
 				case "A":
 					clat = new Integer(svals[1]);
+//					if(clat==24||clat==25)state=state==0?1:state;
+//					else state=0;
 					break;
 				case "O":
 					//Negation because input always positive
 					clon = -(new Integer(svals[1]));
+//					if(clon==-84||clon==-85)state=state==1?2:state;
+//					else state=0;
 					break;
 				case "D":
 					cbin = (new Integer(svals[1]))/degPerBin;
@@ -195,7 +216,17 @@ public class gridStruct2 {
 					//Speed check?
 					//System.err.println(""+(clat)+" "+(clon)+" "+cbin);
 					//System.err.println("!: "+clat+" "+clon+" "+cbin);
+//					if(state==2){
+//						System.err.println("Lattitude: "+clat);
+//						System.err.println("     Longitude: "+clon);
+//						System.err.println("          Bin size: "+((double)cbin)*60.0+" - "+((double)cbin+1.0)*60.0);
+//						state=3;
+//				    }
+//					if(state==3){
+//						npoint.print();
+//					}
 					getBin(clon, clat, cbin).add(npoint);
+					
 					//getBin(clat-LatShift, clon-LonShift, cbin).add(npoint);
 					break;
 				default:

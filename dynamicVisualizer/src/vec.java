@@ -65,13 +65,19 @@ public class vec {
 	   return ret;
    }
    public double norm(){
-	   double sum = 0.0;
-	   for(int i=0; i < N; ++i) sum += get(i);	   
-	   return Math.sqrt(sum);
+	   //double sum = 0.0;
+	   //for(int i=0; i < N; ++i) sum += get(i)*get(i);	   
+	   return Math.sqrt(dot(this));
    }
    public vec normalized(){
-	   double invnorm = 1.0/norm();
+	   double invnorm = norm();
+	   
 	   vec    ret  = new vec(N);
+	   if(invnorm==0.0){
+		   for(int i=0; i < N; ++i) ret.set(i,0.0);
+		   return ret;
+	   }
+	   invnorm = 1.0/invnorm;
 	   for(int i=0; i < N; ++i) ret.set(i,get(i)*invnorm);
 	   return ret;
    }

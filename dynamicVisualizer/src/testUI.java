@@ -13,7 +13,7 @@ public class testUI implements UI {
 	}
 
 	@Override
-	public void Update() {
+	public void Update(long dt) {
 		// TODO Auto-generated method stub
 
 	}

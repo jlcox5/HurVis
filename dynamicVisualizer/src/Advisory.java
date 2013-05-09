@@ -15,15 +15,71 @@ public class Advisory {
 		return !rightOf(lhs,rhs);
 	}
 	
-	public boolean inBounds(vec x, int day){
-	  return rightOf( x.sub(leftBounds[day]), leftBounds[day+1].sub(leftBounds[day]) )
-		 &&   leftOf( x.sub(rightBounds[day]), rightBounds[day+1].sub(rightBounds[day]) );
+	public class lseg{
+		public vec l0;
+		public vec l1;
+		public vec dir;
+		public double length;
+		public lseg(vec nl0, vec nl1){
+			l0 = nl0;
+			l1 = nl1;
+			dir = l1.sub(l0).normalized();
+			length = l1.sub(l0).norm();
+		}
+		public vec project(vec x){
+			return dir.scale(x.sub(l0).dot(dir));
+		}
+		public vec projectClamped(vec x){
+			double run = x.sub(l0).dot(dir);
+			if( run <   0.0  ) run = 0.0;
+			if( run > length ) run = length;
+			return dir.scale(run);
+		}
+		public double distance(vec x){
+			return x.sub(projectClamped(x)).norm();
+		}
+		public boolean rightOf(vec x){
+			vec xdir = x.sub(l0);
+			return xdir.get(0)*dir.get(1)-xdir.get(1)*dir.get(0) < 0.0;
+		}
+		public boolean leftOf(vec x){
+			return !rightOf(x);
+		}
+	};
+	
+	public lseg[] leftBoundingSegs;
+	public lseg[] rightBoundingSegs;
+	
+	public void initBoundingSegments(){
+		int N = leftBounds.length-1;
+		leftBoundingSegs  = new lseg[N];
+		rightBoundingSegs = new lseg[N];
+		
+		for(int i=0; i < N; ++i){
+			leftBoundingSegs [i] = new lseg(project( leftBounds[i]),project( leftBounds[i+1]));
+			rightBoundingSegs[i] = new lseg(project(rightBounds[i]),project(rightBounds[i+1]));
+		}
 	}
 	
 	public boolean inCone(vec x){
-		for(int i=0; i < leftBounds.length-1; ++i)
-			if( !inBounds(x,i) ) return false;
-		return true;
+		double dl=Double.POSITIVE_INFINITY;
+		double dr=Double.POSITIVE_INFINITY;
+		int ndxl=0;
+		int ndxr=0;
+		double temp;
+		for(int i=0; i < leftBoundingSegs.length-1; ++i){
+			temp = leftBoundingSegs[i].distance(x);
+			if(temp < dl){
+				dl   = temp;
+				ndxl = i;
+			}
+			temp = rightBoundingSegs[i].distance(x);
+			if(temp < dr){
+				dr   = temp;
+				ndxr = i;
+			}
+		}
+		return leftBoundingSegs[ndxl].rightOf(x) && rightBoundingSegs[ndxr].leftOf(x) ;
 	}
 	
 	public Random rand = new Random();
@@ -83,6 +139,19 @@ public class Advisory {
     		                        ,vec.vec2(-85.3399,32.6638)};
 	
     public Vector<vec> pathdata = new Vector<vec>();
+    
+    /*public vec[] projectedLeft;
+    public vec[] projectedRight;
+    public void initProjectedBounds(){
+    	int N = leftBounds.length;
+    	projectedLeft  = new vec[N];
+    	projectedRight = new vec[N];
+    	for(int i=0; i < N; ++i){
+    		projectedLeft[i]  = project( leftBounds[i]);
+    		projectedRight[i] = project(rightBounds[i]);
+    	}
+    }
+    */
     
     //private Bounds latlonframe = new Bounds(-100,17,25,16);
     //private Bounds latlonframe = new Bounds(-100,33,25,-15.5);
@@ -232,6 +301,8 @@ public class Advisory {
 		}
  
     	processData();
+    	//initProjectedBounds();
+    	initBoundingSegments();
     	
     	/*
     	System.err.println("LEFT-----------------------------");

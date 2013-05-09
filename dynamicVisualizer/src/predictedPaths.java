@@ -3,6 +3,8 @@ import java.util.Vector;
 
 
 public class predictedPaths implements pathStrategy {
+
+static boolean DEBUG_PREDICTED=false;
 	
 //	vec TEST_PDF_VALUES = {
 //			 vec.vec3()
@@ -33,7 +35,7 @@ public class predictedPaths implements pathStrategy {
 	@Override
 	public vec genDeltas(vec x, double b, int day) {
 		return vec.vec2(bearingPDFs.get(day).generate(adv.rand)
-				       ,speedPDFs.get(day).generate(adv.rand));
+				       ,speedPDFs.get(day).generate(adv.rand)).scale(1.0/adv.hoursInSeg());
 		//return vec.vec2(bearingPDFs.get(day).generate(adv.rand)
 		//		       ,1.0);
 	}
@@ -48,7 +50,7 @@ public class predictedPaths implements pathStrategy {
 		double sf = vizUtils.haversine(p1,p2)/dt1;
 		double si = vizUtils.haversine(p0,p1)/dt0;
 		
-		return sf-si;
+		return (sf-si);
 	}
 	
 	double _getBearingDelta(double bi, double bf){
@@ -77,7 +79,7 @@ public class predictedPaths implements pathStrategy {
 		double bf = vizUtils.findBearing_2(p1, p2);
 		double bi = (180.0+vizUtils.findBearing_2(p1, p0))%360.0;
 		
-		System.err.println("     bf: " + bf + "     bi: " + bi);
+		if(DEBUG_PREDICTED)System.err.println("     bf: " + bf + "     bi: " + bi);
 		
 		return _getBearingDelta(bi,bf);
 	}
@@ -166,7 +168,7 @@ public class predictedPaths implements pathStrategy {
 			double m_s = minSample(sL,c_s,sR,supportSpeed());
 			double M_s = maxSample(sL,c_s,sR,supportSpeed());
 			
-			System.err.println("Speed PDF 0 - Min: " + m_s + "   Cen: " + c_s + "   Max: " + M_s);
+			if(DEBUG_PREDICTED)System.err.println("Speed PDF 0 - Min: " + m_s + "   Cen: " + c_s + "   Max: " + M_s);
 			/*{
 			   double[] san = sanitizePDF_Params(m_s,c_s,M_s);
 			   m_s = san[0];
@@ -176,7 +178,7 @@ public class predictedPaths implements pathStrategy {
 			
 			speedPDFs.set(0,new pdf(m_s,M_s,c_s));
 			
-			System.err.println("Speed PDF 0 - Min: " + m_s + "   Cen: " + c_s + "   Max: " + M_s);
+			if(DEBUG_PREDICTED)System.err.println("Speed PDF 0 - Min: " + m_s + "   Cen: " + c_s + "   Max: " + M_s);
 			
 			//speedPDFs.get(0).Display(); System.exit(0);
 		}
@@ -225,10 +227,10 @@ public class predictedPaths implements pathStrategy {
 				   c_s = san[1];
 				   M_s = san[2];
 			}*/
-			System.err.println("Speed PDF " + i + " - Min: " + m_s + "   Cen: " + c_s + "   Max: " + M_s);
+			if(DEBUG_PREDICTED)System.err.println("Speed PDF " + i + " - Min: " + m_s + "   Cen: " + c_s + "   Max: " + M_s);
 			speedPDFs.set(i,new pdf(m_s,M_s,c_s));
 	   }
-	   printBearingPDFs();
-	   printSpeedPDFs();
+        if(DEBUG_PREDICTED)printBearingPDFs();
+        if(DEBUG_PREDICTED)printSpeedPDFs();
    }
 }

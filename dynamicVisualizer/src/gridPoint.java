@@ -11,4 +11,8 @@ public class gridPoint {
     lon0   = nlon0;
     lon1   = nlon1;
   }
+  
+  public void print(){
+	  System.err.println("                "+bdel+" "+sdel+" "+weight+" "+lat0+" "+lon0);
+  }
 }

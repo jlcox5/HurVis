@@ -55,4 +55,9 @@ public class identityBin extends bin{
 		
 	}
 
+	@Override
+	void printpoints2() {
+		System.err.println("WOT");
+	}
+
 }

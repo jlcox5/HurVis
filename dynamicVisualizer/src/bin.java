@@ -8,6 +8,8 @@ public abstract class bin {
 	abstract double genBearingDelta(double nextDouble);
 
 	abstract double genSpeedDelta(double nextDouble);
+	
+	abstract void printpoints2();
 
 	abstract void printBDF();
 
@@ -23,5 +25,12 @@ public abstract class bin {
 	
 	boolean _debug=false;
 	void DBUG(){_debug=true;}
+
+	double getOriginalArea(){return 0.0;}
+
+	public double getRevisedArea() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 }

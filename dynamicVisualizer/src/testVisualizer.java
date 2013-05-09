@@ -81,7 +81,7 @@ public class testVisualizer implements Visualizer {
 	}
 
 	@Override
-	public void Update() {
+	public void Update(long dt) {
 		// TODO Auto-generated method stub
 		
         //Do nothing at all

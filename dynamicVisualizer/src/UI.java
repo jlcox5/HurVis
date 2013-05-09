@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 
 public interface UI {
-	public void Update();
+	public void Update(long dt);
 	
 	public BufferedImage Draw(Dimension d);
 }

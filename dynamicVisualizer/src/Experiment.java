@@ -6,6 +6,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -53,21 +54,28 @@ public class Experiment extends JPanel{
    private Visualizer viz;
    private UI         ui;
    
+   private long freq=30l;
    private Timer sched = new Timer(true);
+   private long updateTimestamp;
    public Experiment(){
 	   //viz = new testVisualizer("testOtter.jpg");
 	   viz = new oldMethod();
 	   ui  = new testUI();
+	   
+	   updateTimestamp = (new Date()).getTime();
 	   
 	   //30 hertz, hardcoded for now
 	   sched.scheduleAtFixedRate(new TimerTask(){
 
 		@Override
 		public void run() {
-		   Update();
+		   long t1 = (new Date()).getTime();
+		   long dt = t1-updateTimestamp;
+		   updateTimestamp = t1;
+		   Update(dt);
 		}
 		
-	   }, 0, 1000l/30l);
+	   }, 0, 1000l/freq);
 	   
 	   
 	  /* viz.Draw();
@@ -78,9 +86,9 @@ public class Experiment extends JPanel{
 	   //add(new testButton());
    }
    
-   public void Update(){
-	   viz.Update();
-	   ui.Update();
+   public void Update(long dt){
+	   viz.Update(dt);
+	   ui.Update(dt);
 	   repaint();
    }
    

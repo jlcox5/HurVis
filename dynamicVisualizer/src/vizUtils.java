@@ -62,6 +62,15 @@ public class vizUtils {
 		   return earthRad() * b;
 	}
 	
+	public static float scaledPulseLife(float scale, float x){
+		//Using Inigo Quilez' cubic pulse
+		x = Math.abs(x-.5f);
+		if( x>.5000f ) return 0f;
+		x *= 2f;
+		float scp = 1f-x*x*(3f-2f*x);
+		return scale*scp;
+	}
+	
 	//                                      (lat,lon)      (in km)   (deg - not rad)
 	public static vec spherical_translation(vec curPos, double dist, double bearing){
 		
@@ -88,5 +97,8 @@ public class vizUtils {
 		double ret = Math.atan2(y,x)/PI180;
 		
 		return ret<0.0?360.0+ret:ret;
+	}
+	public static double clamp(double x, double e0, double e1){
+		return Math.max(e0,Math.min(x, e1));
 	}
 }
