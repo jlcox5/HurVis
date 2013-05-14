@@ -64,8 +64,9 @@ public class vizUtils {
 	
 	public static float scaledPulseLife(float scale, float x){
 		//Using Inigo Quilez' cubic pulse
+		
 		x = Math.abs(x-.5f);
-		if( x>.5000f ) return 0f;
+		if( x>.50f ) return 0f;
 		x *= 2f;
 		float scp = 1f-x*x*(3f-2f*x);
 		return scale*scp;

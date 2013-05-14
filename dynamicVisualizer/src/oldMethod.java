@@ -16,6 +16,7 @@ public class oldMethod implements Visualizer {
 	private float width, height, ol, or, ot, ob;
 	
 	private Vector<Path> paths = new Vector<Path>(100,50);
+	//private Vector<Path> paths = new Vector<Path>();
 	
 	private class iwobs implements ImageObserver{
 	      	 public boolean gotwidth = false;
@@ -88,9 +89,10 @@ public class oldMethod implements Visualizer {
        //g.clearRect(0, 0, 512, 512);
 	}
 	
-	private static final int pathTTL = 5000;
-	private static final int PPS     = 50; //Paths per second
-	private static final int Nmax    = 300; //Max active paths
+	private static final int pathTTL = 10000;
+	private static final float tf0   = 0.25f;
+	private static final int PPS     = 100; //Paths per second
+	private static final int Nmax    = 500; //Max active paths
 	
 	private static boolean extinction = true;
 	private static boolean once = false;
@@ -120,20 +122,23 @@ public class oldMethod implements Visualizer {
 		trickle = dtplus%pathPeriodms +(N-Nc)*pathPeriodms;
 		
 		for(long i=0; i < Nc; ++i) generatePath();
+		//generatePath();
 	}
 
 	public void extinction(long dt){
-		
-		if(extinction){
-		   int dcursor=0;
-		   while(dcursor<paths.size()){
-			   paths.get(dcursor).age(dt);
-		       //if(paths.get(dcursor).dec()) paths.removeElementAt(dcursor);
-			   //else ++dcursor;
-			   if( paths.get(dcursor).dead() ) paths.removeElementAt(dcursor);
-			   else ++dcursor;
-		   }
+		Vector<Path> npaths = new Vector<Path>(100,50);
+		int dcursor=0;
+		while(dcursor<paths.size()){
+		  paths.get(dcursor).age(dt);
+		  if( paths.get(dcursor).dead() ) paths.removeElementAt(dcursor);
+		  else ++dcursor;
+	    }
+		/*while(dcursor<paths.size()){
+			  paths.get(dcursor).age(dt);
+			  if( !paths.get(dcursor).dead() ) npaths.add(paths.get(dcursor));
+			  ++dcursor;
 		}
+		paths=npaths;*/
 	}
 	
 	public void updateInsideOut(){
@@ -160,7 +165,7 @@ public class oldMethod implements Visualizer {
 		//double b = vizUtils.sanitizeBearing(adv.getInitialBearing());
 		double b = vizUtils.sanitizeBearing(adv.getInitialBearing());
 		
-		Path p = new Path(pathTTL);
+		Path p = new Path(((int)(((float)pathTTL)*(1f+tf0))));
 		     p.nodes.add(adv.project(x0));
 		     
 		//pathStrategy strat = insideOutRatio>0.68f?historical:predicted;
@@ -170,7 +175,7 @@ public class oldMethod implements Visualizer {
 		pathStrategy strat;
 		//double scale=1.0;
 		double scale=adv.hoursInSeg();
-		     
+		//System.err.println(insideOutRatio);
 		if(insideOutRatio > 0.68f){
 			//use historical
 			strat = historical;
@@ -180,6 +185,8 @@ public class oldMethod implements Visualizer {
 			strat = predicted;
 			//scale = 1.0;
 		}
+		
+		//strat = predicted;
 		     
 		boolean report = false;
 		
@@ -291,7 +298,7 @@ public class oldMethod implements Visualizer {
 		}
 	}
 	
-	private void drawPaths(Graphics g,Dimension d){
+	private void drawPathsAlt(Graphics g,Dimension d){
 		//Color proto = Color.blue;
 		float[] proto = {0f,0.2f,1f};
 		
@@ -327,7 +334,32 @@ public class oldMethod implements Visualizer {
 			}
 		}
 	}
-	private void drawPaths(Graphics g,Dimension d,int MAX){
+	private void drawPaths(Graphics g,Dimension d){
+		//Color proto = Color.blue;
+		float[] proto = {0f,0.2f,1f};
+		
+		for(int i=0; i < paths.size(); ++i){
+			Path p_i = paths.get(i);
+			//float alpha = ((float)p_i.ttl)/255.0f;
+			//System.err.println(p_i.life());
+			g.setColor(new Color(proto[0],proto[1],proto[2],p_i.life()));
+			
+			//g.setColor(new Color(proto[0],proto[1],proto[2],1f));
+			
+			vec v_ij0 = p_i.nodes.get(0);
+			for(int j=1; j < p_i.nodes.size(); ++j){
+				//System.err.println(i);
+			//for(int j=1; j < 2; ++j){
+				vec v_ij1 = p_i.nodes.get(j);
+				//g.drawLine((int)v_ij0.get(0),(int)v_ij0.get(1)
+				//		  ,(int)v_ij1.get(0),(int)v_ij1.get(1));
+				
+				drawPath(g,v_ij0,v_ij1,d);
+				v_ij0 = v_ij1;
+			}
+		}
+	}
+	private void drawPathsAlt(Graphics g,Dimension d,int MAX){
 		//Color proto = Color.blue;
 		float[] proto = {0f,0.2f,1f};
 		
@@ -351,6 +383,29 @@ public class oldMethod implements Visualizer {
 			      g.setColor(new Color(0f, 0f, 1f,p_i.life()));
 				}
 				colorChange = !colorChange;
+				drawPath(g,v_ij0,v_ij1,d);
+				v_ij0 = v_ij1;
+			}
+		}
+	}
+	private void drawPaths(Graphics g,Dimension d,int MAX){
+		//Color proto = Color.blue;
+		float[] proto = {0f,0.2f,1f};
+		
+		for(int i=0; i < paths.size(); ++i){
+			Path p_i = paths.get(i);
+			//float alpha = ((float)p_i.ttl)/255.0f;
+			g.setColor(new Color(proto[0],proto[1],proto[2],p_i.life()));
+			
+			vec v_ij0 = p_i.nodes.get(0);
+			boolean colorChange = true;
+			for(int j=1; j < Math.min(MAX+1,p_i.nodes.size()); ++j){
+				//System.err.println(i);
+			//for(int j=1; j < 2; ++j){
+				vec v_ij1 = p_i.nodes.get(j);
+				//g.drawLine((int)v_ij0.get(0),(int)v_ij0.get(1)
+				//		  ,(int)v_ij1.get(0),(int)v_ij1.get(1));
+				
 				drawPath(g,v_ij0,v_ij1,d);
 				v_ij0 = v_ij1;
 			}
@@ -394,7 +449,7 @@ public class oldMethod implements Visualizer {
 		drawErrorBars(g,d);
 		drawTruePath(g,d);
 		//drawPaths(g,d);
-		drawPathsInsideOut(g,d);
+		//drawPathsInsideOut(g,d);
 		//drawPaths(g,d,1);
 		
 		//return image.getScaledInstance(d.width,d.height,Image.SCALE_SMOOTH);

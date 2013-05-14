@@ -172,10 +172,13 @@ public class pdf {
 	}
 	
 	static int count = 5;
+	//static boolean sOrB = true;
 	public double generate(Random rand){
 		if(count-- > 0) System.err.println(area);
 		//System.err.println(count++);
 		double r = rand.nextDouble();
+		//if(sOrB){ r = 0.0; sOrB = !sOrB;}
+		//else{r = 0.5; sOrB = !sOrB;}
 		//r = 1.0;
 		double t=0,tn=areas[0];
 		int i=0;

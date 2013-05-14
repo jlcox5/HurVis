@@ -170,7 +170,7 @@ public class Advisory {
     private static double[] errorRad = {50.004, 100.471, 144.302, 187.515, 283.263, 390.463};
     //private static double[] errorRadSegs = null;
     
-    private double getErrorDayi(int i){
+    public double getErrorDayi(int i){
     	return i==0 ? 0.0 : errorRad[Math.min(i-1, 5)];
     }
     
@@ -360,7 +360,8 @@ public class Advisory {
     	   vec p0 = d0.head(2);
     	   vec p1 = d1.head(2);
     	   
-    	   double bearO = (vizUtils.findBearing_2(p1,p0)+180)%360;
+    	   //double bearO = (vizUtils.findBearing_2(p1,p0)+180)%360;
+    	   double bearO = vizUtils.findBearing_2(p0,p1);
     	   //double bearL = bearO < 90.0 ? bearO + 270.0 : bearO - 90.0;
     	   //double bearR = (bearO + 90.0) % 360.0;
     	   double bearL = vizUtils.sanitizeBearing(bearO - 90.0);
@@ -371,7 +372,7 @@ public class Advisory {
     	   leftErrProto[i+1] = vizUtils.spherical_translation(p1, getErrorDayi(i+1), bearL);
     	   rightErrProto[i+1] = vizUtils.spherical_translation(p1, getErrorDayi(i+1), bearR);
     	   
-    	   System.err.println("lefErr " + (i+1) + ": " + leftErrProto[i+1]);
+    	   System.err.println("lefErr " + (i) + ": " + leftErrProto[i]);
     	   
     	   lastCursor=thisCursor;
        }
@@ -387,12 +388,31 @@ public class Advisory {
     	   vec R0 = rightErrProto[i];
     	   vec R1 = rightErrProto[i+1];
     	   
-    	   for(int j=0; j < (J=hoursInOriginalSegi(i)/3); ++j){
-    		   double dubj = (double)j;
-    		   double t = dubj/dubJ;
+    	   vec curPosL = L0;
+    	   double tBearL = vizUtils.findBearing_2(L0, L1);
+    	   double distL = (vizUtils.haversine(L0, L1)/hoursInOriginalSegi(i))*3;
+    	   leftBounds[segments] = curPosL;
+    	   
+    	   vec curPosR = R0;
+    	   double tBearR = vizUtils.findBearing_2(R0, R1);
+    	   double distR = (vizUtils.haversine(R0, R1)/hoursInOriginalSegi(i))*3;
+    	   rightBounds[segments] = curPosR;
+    	   ++segments;
+    	   
+    	   for(int j=1; j < (J=hoursInOriginalSegi(i)/3); ++j){
+    		   curPosL = vizUtils.spherical_translation(curPosL, distL,tBearL);
+    		   tBearL = vizUtils.findBearing_2(curPosL, L1);
+    		   leftBounds[segments] = curPosL;
     		   
-    		   leftBounds[segments] = L0.lerp(L1,t);
-    		   rightBounds[segments] = R0.lerp(R1,t);
+    		   curPosR = vizUtils.spherical_translation(curPosR, distR, tBearR);
+    		   tBearR = vizUtils.findBearing_2(curPosR, R1);
+    		   rightBounds[segments] = curPosR;
+    		   
+    		   //double dubj = (double)j;
+    		   //double t = dubj/dubJ;
+    		   
+    		   //leftBounds[segments] = L0.lerp(L1,t);
+    		   //rightBounds[segments] = R0.lerp(R1,t);
     		   
     		   ++segments;
     	   }

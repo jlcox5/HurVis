@@ -17,12 +17,14 @@ public class Path {
 	}
 	public int ttl = 0;
 	public int ttl0 = 1;
+	public float invttl0=1;
 	public Path(int nttl){
 		ttl = nttl;
 		ttl0 = Math.max(ttl, 1);
+		invttl0=1f/((float)ttl0);
 	}
-	public float life(){ return vizUtils.scaledPulseLife(.4f,((float)ttl)/((float)ttl0)); }
-	public boolean dead(){ return ttl <= 0;      }
+	public float life(){ return vizUtils.scaledPulseLife(.4f,((float)ttl)*invttl0); }
+	public boolean dead(){ return ttl < 0;      }
 	public boolean dec() { --ttl; return dead(); }
 	@Override
 	public String toString(){

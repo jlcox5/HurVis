@@ -1,4 +1,5 @@
 import java.awt.AlphaComposite;
+
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -11,6 +12,8 @@ import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+
+import java.util.concurrent.locks.*;
 
 
 public class Experiment extends JPanel{
@@ -85,27 +88,35 @@ public class Experiment extends JPanel{
 	   
 	   //add(new testButton());
    }
-   
+   private final ReentrantLock lock = new ReentrantLock();
    public void Update(long dt){
-	   viz.Update(dt);
-	   ui.Update(dt);
-	   repaint();
+	   lock.lock();
+	   {
+	     viz.Update(dt);
+	     ui.Update(dt);
+	     repaint();
+	   }
+	   lock.unlock();
    }
    
    @Override
-   public void paintComponent(Graphics g){	   
-	   //viz.Update();
-	   //ui.Update();
-	   
-	   int W = getWidth();
-	   int H = getHeight();
-	   //g.drawImage(viz.getRender(W, H), 0, 0, W, H,null);
-	   
-	   Image vizIm = viz.Draw(new Dimension(W,H));
-	   BufferedImage uiIm  = ui.Draw(new Dimension(W,H));
-	   
-	   super.paintComponent(g);
-	   g.drawImage(vizIm,0,0,null);
-	   g.drawImage(uiIm,0,0,null);
+   public void paintComponent(Graphics g){
+	   lock.lock();
+	   {
+		   //viz.Update();
+		   //ui.Update();
+
+		   int W = getWidth();
+		   int H = getHeight();
+		   //g.drawImage(viz.getRender(W, H), 0, 0, W, H,null);
+
+		   Image vizIm = viz.Draw(new Dimension(W,H));
+		   BufferedImage uiIm  = ui.Draw(new Dimension(W,H));
+
+		   super.paintComponent(g);
+		   g.drawImage(vizIm,0,0,null);
+		   g.drawImage(uiIm,0,0,null);
+	   }
+	   lock.unlock();
    }
 }
